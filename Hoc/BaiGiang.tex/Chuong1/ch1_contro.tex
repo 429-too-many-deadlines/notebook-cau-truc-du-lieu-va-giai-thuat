@@ -1,0 +1,1123 @@
+% =====================================================================
+%  BÀI 1: CON TRỎ - CẤP PHÁT ĐỘNG - ỨNG DỤNG   (slide 1 - 48)
+% =====================================================================
+\LectureTitle{CON TRỎ - CẤP PHÁT ĐỘNG - ỨNG DỤNG}
+
+% ---------------------------------------------------------------- 2
+\begin{frame}{Nội dung}
+\begin{slidepic}
+  \draw[blue,line width=1.6pt] (5.04,2.31) -- (1.14,2.31) -- (1.14,3.9);
+  \draw[nodegreen!80!black,line width=1.6pt] (10.33,7.97) -- (14.96,7.97) -- (14.96,5.95);
+\end{slidepic}
+\begin{blk}{6}{1.6}{2.8}\color{tocblue}\fontsize{11}{17.3}\selectfont
+\begin{enumerate}[label=\arabic*.,leftmargin=1.5em,itemsep=1.2pt]
+\item Biến và vùng nhớ RAM
+\item Toán tử \& và *
+\item Khái niệm con trỏ
+\item Cú pháp khai báo
+\item Con trỏ có giá trị NULL
+\item Cấp phát bộ nhớ
+\end{enumerate}
+\end{blk}
+\begin{blk}{7}{7.75}{2.8}\color{tocblue}\fontsize{11}{17.3}\selectfont
+\begin{enumerate}[label=\arabic*.,leftmargin=1.5em,itemsep=1.2pt,start=7]
+\item Con trỏ và hàm
+\item Con trỏ và chuỗi
+\item Con trỏ trong mảng 1 chiều
+\item Con trỏ và cấu trúc
+\item Bài tập
+\end{enumerate}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 3
+\begin{frame}[fragile]{Ý tưởng: Đặt nghi vấn}
+\begin{blk}{6}{1.2}{1.65}\sub{Xem chương trình sau}\end{blk}
+\begin{blk}{5.3}{3.27}{2.39}
+\begin{lstlisting}[style=gray,basicstyle=\cf{11.1}]
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    char c = 'F';
+    int x = 10;
+    float y = 1.8;
+
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\begin{blk}{5}{9.4}{4.6}\centering\small
+Các biến \red{\textbf{c}}, \red{\textbf{x}}, \red{\textbf{y}} được quản lý\\ như thế nào?
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 4
+\begin{frame}{Vùng nhớ RAM}
+\begin{blk}{8.9}{1.3}{1.65}
+\sub{Vùng nhớ RAM (Random Access Memory)}\par\vspace{2pt}
+\begin{itemize}[itemsep=3pt]\small
+\item RAM là vùng nhớ được sử dụng để \red{lưu trữ} các \red{dữ liệu} và chương trình đang hoạt động trong thời gian thực.
+\item Trong RAM có nhiều cell, mỗi cell trong RAM có một \hl{địa chỉ} duy nhất để truy cập vào cell đó.
+\item Vùng nhớ RAM dùng để lưu trữ dữ liệu và dữ liệu có thể được truy cập bất kỳ vị trí nào trong RAM một cách ngẫu nhiên và \hl{\red{nhanh chóng}}. Tức là có thể truy cập vào bất kỳ cell nào trong RAM một cách nhanh chóng.
+\item Nhưng, RAM là vùng nhớ tạm thời, tức là dữ liệu chỉ \red{tồn tại} trong khi máy tính \red{đang hoạt động} và bị \red{xóa} khi máy tính \red{tắt}.
+\end{itemize}
+\end{blk}
+\begin{slidepic}
+  \ramhead{11.6}{12.56}{15.53}{1.75}
+  \foreach \a [count=\i from 0] in {a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,aa,ab,ac}{
+    \ramaddr{11.6}{2.0+0.218+\i*0.436}{0xf919\a}
+    \ramcell{12.56}{15.53}{2.0+\i*0.436}{2.0+\i*0.436+0.436}{}
+  }
+  \node[font=\fontsize{7}{8}\selectfont,text=uitblue] at (14.05,2.0+0.218+0.436) {1 byte};
+  \ramaddr{11.6}{7.88}{......}
+  \draw[membord,line width=0.3pt] (12.56,7.67) -- (12.56,8.1) (15.53,7.67) -- (15.53,8.1);
+  \node[font=\fontsize{7}{8}\selectfont] at (14.05,7.88) {......};
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 5
+\LeftTitle[6.45cm]
+\begin{frame}[fragile]{Vùng nhớ RAM}
+\begin{blk}{6}{1.2}{1.65}\sub{Biến và vùng nhớ RAM}\end{blk}
+\begin{blk}{5.3}{1.14}{2.47}
+\begin{lstlisting}[basicstyle=\cf{11.2}]
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    char c = 'F';
+    int x = 10;
+    float y = 1.8;
+
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\begin{slidepic}
+  \ramhead{8.53}{9.54}{11.77}{0.62}
+  \def\yo{0.78}\def\h{0.436}
+  \foreach \a [count=\i from 0] in {a0,a3,a4,a5,a7,a8,a9,aa,ab,ac,ad,ae,af}{
+    \pgfmathtruncatemacro\k{\i+(\i>0)*2+(\i>3)}
+    \ramaddr{8.53}{\yo+\h/2+\k*\h}{0xf919\a}}
+  \ramaddr[red]{8.53}{\yo+\h/2+1*\h}{0xf919a1}
+  \ramaddr[red]{8.53}{\yo+\h/2+2*\h}{0xf919a2}
+  \ramaddr[red]{8.53}{\yo+\h/2+6*\h}{0xf919a6}
+  \ramcell{9.54}{11.77}{\yo}{\yo+\h}{}
+  \ramcell{9.54}{11.77}{\yo+\h}{\yo+2*\h}{\texttt{'F'}}
+  \ramcell{9.54}{11.77}{\yo+2*\h}{\yo+6*\h}{10}
+  \ramcell{9.54}{11.77}{\yo+6*\h}{\yo+14*\h}{1.8}
+  \ramcell{9.54}{11.77}{\yo+14*\h}{\yo+15*\h}{}
+  \ramcell{9.54}{11.77}{\yo+15*\h}{\yo+16*\h}{}
+  \draw[membord,line width=0.3pt] (9.54,\yo+16*\h) -- (9.54,\yo+17*\h) (11.77,\yo+16*\h) -- (11.77,\yo+17*\h);
+  \ramaddr{8.53}{\yo+16.5*\h}{......}
+  \node[font=\fontsize{7}{8}\selectfont] at (10.65,\yo+16.5*\h) {......};
+  \node[font=\bfseries,text=black] at (12.37,\yo+1.5*\h) {c};
+  \node[font=\bfseries,text=black] at (12.37,\yo+4*\h) {x};
+  \node[font=\bfseries,text=black] at (12.37,\yo+10*\h) {y};
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 6
+{\showfooterfalse
+\begin{frame}[plain]
+\plainnumber
+\begin{slidepic}
+  \node[font=\small\bfseries\itshape,text=red] at (11.47,0.55) {Cách vẽ gọn hơn};
+  \ramhead{3.84}{4.69}{7.0}{1.22}
+  \def\yo{1.38}\def\h{0.436}
+  \foreach \a [count=\i from 0] in {a0,a3,a4,a5,a7,a8,a9,aa,ab,ac,ad,ae,af}{
+    \pgfmathtruncatemacro\k{\i+(\i>0)*2+(\i>3)}
+    \ramaddr{3.84}{\yo+\h/2+\k*\h}{0xf919\a}}
+  \ramaddr[red]{3.84}{\yo+\h/2+1*\h}{0xf919a1}
+  \ramaddr[red]{3.84}{\yo+\h/2+2*\h}{0xf919a2}
+  \ramaddr[red]{3.84}{\yo+\h/2+6*\h}{0xf919a6}
+  \ramcell{4.69}{7.0}{\yo}{\yo+\h}{}
+  \ramcell{4.69}{7.0}{\yo+\h}{\yo+2*\h}{\texttt{'F'}}
+  \ramcell{4.69}{7.0}{\yo+2*\h}{\yo+6*\h}{10}
+  \ramcell{4.69}{7.0}{\yo+6*\h}{\yo+14*\h}{1.8}
+  \ramcell{4.69}{7.0}{\yo+14*\h}{\yo+15*\h}{}
+  \ramcell{4.69}{7.0}{\yo+15*\h}{\yo+16*\h}{}
+  \draw[membord,line width=0.3pt] (4.69,\yo+16*\h) -- (4.69,\yo+17*\h) (7.0,\yo+16*\h) -- (7.0,\yo+17*\h);
+  \ramaddr{3.84}{\yo+16.5*\h}{......}
+  \node[font=\fontsize{7}{8}\selectfont] at (5.85,\yo+16.5*\h) {......};
+  \node[font=\bfseries,text=black] at (7.68,\yo+1.5*\h) {c};
+  \node[font=\bfseries,text=black] at (7.68,\yo+4*\h) {x};
+  \node[font=\bfseries,text=black] at (7.68,\yo+10*\h) {y};
+  % cách vẽ gọn
+  \node[mem,minimum width=1.75cm,minimum height=0.9cm] (c) at (11.85,2.15) {'F'};
+  \node[memaddr,above=1pt of c] {\texttt{0xf919a1}};
+  \node[memlbl,left=3pt of c] {c};
+  \node[mem,minimum width=1.75cm,minimum height=0.9cm] (x) at (11.85,4.55) {10};
+  \node[memaddr,above=1pt of x] {\texttt{0xf919a2}};
+  \node[memlbl,left=3pt of x] {x};
+  \node[mem,minimum width=1.75cm,minimum height=0.9cm] (y) at (11.85,7.05) {1.8};
+  \node[memaddr,above=1pt of y] {\texttt{0xf919a6}};
+  \node[memlbl,left=3pt of y] {y};
+\end{slidepic}
+\end{frame}}
+
+% ---------------------------------------------------------------- 7
+\begin{frame}{Toán tử \& và *}
+\begin{blk}{14}{1.2}{1.65}
+\sub{Toán tử \&}\par\vspace{3pt}
+\begin{itemize}[itemsep=7pt]\small
+\item Toán tử \red{\textbf{\&}} dùng để lấy địa chỉ của biến.
+\item Phương pháp dùng:\par
+  \hspace*{4.1cm}\texttt{\bk{\&}\textcolor{codenum}{tên\_biến}}
+\end{itemize}
+\vspace{0.95cm}
+\sub{Toán tử *}\par\vspace{3pt}
+\begin{itemize}[itemsep=7pt]\small
+\item Toán tử \red{*} được sử dụng để truy cập vào giá trị mà một con trỏ đang trỏ đến.
+\item (Toán tử \red{*} dùng để truy cập giá trị mà một địa chỉ đang quản lý.)
+\item Phương pháp dùng:\par
+  \hspace*{4.9cm}\texttt{\bk{*}\textcolor{codenum}{địa\_chỉ\_biến}}
+\end{itemize}
+\end{blk}
+\begin{slidepic}
+  \node[mem,minimum width=2.2cm,minimum height=0.95cm] (v) at (12.36,3.25) {value};
+  \node[memaddr,above=1pt of v] {\addr{b369}};
+  \node[memlbl,left=3pt of v] {x};
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 8
+\begin{frame}[fragile]{Toán tử \& và *}
+\begin{blk}{3}{1.2}{1.65}\sub{Minh họa}\end{blk}
+\begin{blk}{11.8}{3.5}{1.75}
+\begin{lstlisting}[style=red,basicstyle=\cf{11.3}]
+#include <iostream>
+using namespace std;
+int main()
+{
+    int x = 36;
+
+    cout << "Gia tri bien x = " <<  x << endl;
+    cout << "Dia chi bien x : " << &x << endl;
+    printf("Dia chi bien x : %p", &x); printf("\n");
+    printf("Dia chi bien x : %x", &x);
+
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\begin{slidepic}
+  \node[mem,minimum width=1.8cm] (v) at (12.24,3.24) {36};
+  \node[memaddr,above=1pt of v] {\addr{b369}};
+  \node[memlbl,left=3pt of v] {x};
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 9
+\begin{frame}[fragile]{Toán tử \& và *}
+\begin{blk}{3}{1.2}{1.65}\sub{Minh họa}\end{blk}
+\begin{blk}{11.7}{3.35}{1.85}
+\begin{lstlisting}[style=red,basicstyle=\cf{11.2}]
+#include <iostream>
+using namespace std;
+int main()
+{
+    int x = 36;
+
+    cout << "Gia tri bien x = " <<  x << endl;
+    cout << "Dia chi bien x : " << (*@\hl{\&x}@*) << endl;
+
+    cout << "Gia tri bien x = " <<  *((*@\hl{\&x}@*)) << endl;
+
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\begin{slidepic}
+  \node[mem,minimum width=1.8cm] (v) at (12.17,3.32) {36};
+  \node[memaddr,above=1pt of v] {\addr{b369}};
+  \node[memlbl,left=3pt of v] {x};
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 10
+\begin{frame}{Khái niệm con trỏ (\red{pointer})}
+\begin{blk}{14.3}{1.3}{1.65}
+\sub{Con trỏ - pointer}
+\begin{itemize}[itemsep=3pt]\small
+\item Con trỏ là một \underline{kiểu dữ liệu đặc biệt} dùng để \red{lưu địa chỉ} trong bộ nhớ.
+\item Con trỏ cho phép truy cập và thay đổi dữ liệu của \red{biến} được quản lý bởi một \red{địa chỉ}.
+\item Sử dụng con trỏ thì cần cẩn thận và chắc chắn sử dụng chính xác để tránh các vấn đề liên quan đến quản lý bộ nhớ.
+\end{itemize}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 11
+\begin{frame}{Cú pháp khai báo}
+\begin{blk}{16}{0}{2.2}\centering\fontsize{13}{15}\selectfont
+\texttt{\textcolor{codekw}{Kiểu\_Dữ\_Liệu}\bk{* ten\_con\_tro;}}
+\end{blk}
+\begin{blk}{14}{1.2}{3.5}\small
+Trong đó:
+\begin{itemize}[itemsep=3pt]
+\item \texttt{\textcolor{codekw}{Kiểu\_Dữ\_Liệu}} là kiểu dữ liệu của biến mà con trỏ sẽ trỏ tới. Ví dụ: int, float, char, double… hoặc kiểu dữ liệu khác.
+\item \bk{*} gọi là toán tử con trỏ, đặt sau kiểu dữ liệu để khai báo là một con trỏ.
+\item \texttt{\bk{ten\_con\_tro}} tên của con trỏ.
+\end{itemize}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 12
+\begin{frame}[fragile]{Minh họa}
+\begin{blk}{6}{1.3}{1.65}\sub{Ví dụ khai báo con trỏ}\end{blk}
+\begin{blk}{8}{2.1}{2.5}
+\begin{lstlisting}[style=nobox,basicstyle=\ttfamily\fontsize{11.5}{15}\selectfont\color{black},linewidth=8cm]
+int* iP;
+float* fP;
+
+int *p1, *p2, *p3;
+
+
+SinhVien* pSV;
+ToaDo* pTD;
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 13
+\begin{frame}[fragile]{Con trỏ có giá trị NULL}
+\begin{blk}{14.3}{1.1}{1.6}
+\begin{itemize}[itemsep=3pt]\small
+\item Khi khai báo \underline{kiểu con trỏ} và không gán giá trị địa chỉ nào hết thì con trỏ đó \underline{chưa khởi tạo}.
+\item Nếu gán giá trị \textbf{NULL} cho con trỏ thì gọi là \textbf{con trỏ NULL}, sẽ không trỏ vào địa chỉ của biến nào cả.
+\item Ví dụ:
+\end{itemize}
+\end{blk}
+\begin{blk}{9}{1.1}{4.2}
+\begin{lstlisting}[style=nobox,basicstyle=\ttfamily\fontsize{11}{14.4}\selectfont\color{black}]
+int* p1;   (*@\vcmt{//Con trỏ chưa khởi tạo}@*)
+int* p2 = NULL; (*@\vcmt{//Con trỏ NULL}@*)
+
+int n = 36;
+int* p3 = &n; (*@\vcmt{//Con trỏ có địa chỉ}@*)
+\end{lstlisting}
+\end{blk}
+\begin{slidepic}
+  \node[mem,minimum width=1.8cm] (p1) at (9.85,3.97) {...};
+  \node[memaddr,above=1pt of p1] {\addr{b577}};
+  \node[memlbl,left=3pt of p1] {p1};
+  \node[mem,minimum width=1.8cm] (p2) at (9.85,5.36) {NULL};
+  \node[memaddr,above=1pt of p2] {\addr{b456}};
+  \node[memlbl,left=3pt of p2] {p2};
+  \node[mem,minimum width=1.8cm] (p3) at (9.85,7.85) {0xf123};
+  \node[memaddr,above=1pt of p3] {\addr{b369}};
+  \node[memlbl,left=3pt of p3] {p3};
+  \node[mem,minimum width=1.85cm] (n2) at (13.0,4.38) {369};
+  \node[memaddr,above=1pt of n2] {\addr{f129}};
+  \node[memlbl,left=3pt of n2] {n2};
+  \node[mem,minimum width=1.85cm] (n) at (12.7,6.05) {36};
+  \node[memaddr,above=1pt of n] (na) {\addr{f123}};
+  \node[memlbl,left=3pt of n] {n};
+  \ptrto{p3}{na}{15.12}
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 14
+\begin{frame}[fragile]{Tính kích thước: sizeof()}
+\begin{blk}{14.3}{1.2}{1.65}
+\sub{size hoặc sizeof()}
+\begin{itemize}[itemsep=3pt]\small
+\item Để xác định kích thước của \red{kiểu dữ liệu} hoặc \red{biến} thì dùng size hoặc sizeof(). Đơn vị: \red{byte}
+\item Cú pháp:\par\vspace{2pt}
+  \hspace*{5.5cm}\texttt{\textcolor{codekw}{sizeof}\bk{(}\textcolor{codenum}{kiểu\_dữ\_liệu}\bk{)}}\par\vspace{2pt}
+  \hspace*{5.5cm}\texttt{\textcolor{codekw}{sizeof} \bk{ten\_bien}}
+\item Ví dụ:
+\end{itemize}
+\end{blk}
+\begin{blk}{6.85}{3.08}{5.17}
+\begin{lstlisting}[basicstyle=\cf{10.7}]
+double x = 9.6;
+double* p;
+
+cout << sizeof(int) << endl;       4
+cout << sizeof(double) << endl;    8
+cout << sizeof x << endl;          8
+cout << sizeof p << endl;          (*@\hl{4}@*)
+\end{lstlisting}
+\end{blk}
+\begin{blk}{2.6}{13.15}{5.8}
+\raggedright\fontsize{5.5}{6.6}\selectfont\itshape
+Kích thước của một con trỏ trong C++ có thể khác nhau trên các nền tảng và trình biên dịch khác nhau.\\
+32-bit (4 byte)\\
+64-bit (8 byte)
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 15
+\begin{frame}{Khái niệm cấp phát bộ nhớ}
+\begin{blk}{13.8}{1.2}{1.65}
+\sub{Cấp phát bộ bộ nhớ tĩnh (Static Memory Allocation)}
+\begin{itemize}[itemsep=3pt]\small
+\item Được thực hiện bằng cách khai báo \textcolor{blue}{mảng} hoặc \textcolor{blue}{biến} với kích thước cụ thể tại thời điểm biên dịch.
+\item Các biến và mảng được cấp phát bộ nhớ tĩnh tồn tại trong suốt thời gian chạy chương trình và không thay đổi kích thước khi chạy.
+\end{itemize}
+\vspace{0.7cm}
+\sub{Cấp phát động (Dynamic Memory Allocation)}
+\begin{itemize}[itemsep=3pt]\small
+\item Cho phép cấp phát bộ nhớ trong quá trình chạy chương trình và giải phóng bộ nhớ khi không cần sử dụng nữa.
+\end{itemize}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 16
+\begin{frame}{Phương pháp cấp nhát bộ nhớ}
+\begin{slidepic}[every node/.style={font=\small}]
+  \def\xa{1.2}\def\xb{3.99}\def\xc{9.59}\def\xd{14.96}
+  \def\ya{2.85}\def\yb{3.83}\def\yc{4.97}\def\yd{6.77}
+  \fill[memfill] (\xa,\ya) rectangle (\xd,\yb);
+  \draw[brown!60!black,line width=0.6pt] (\xa,\ya) rectangle (\xd,\yd)
+     (\xa,\yb)--(\xd,\yb) (\xa,\yc)--(\xd,\yc) (\xb,\ya)--(\xb,\yd) (\xc,\ya)--(\xc,\yd);
+  \node[font=\small\bfseries] at ({(\xa+\xb)/2},{(\ya+\yb)/2}) {Ngôn ngữ};
+  \node[font=\small\bfseries] at ({(\xb+\xc)/2},{(\ya+\yb)/2}) {Cấp phát};
+  \node[font=\small\bfseries] at ({(\xc+\xd)/2},{(\ya+\yb)/2}) {Thu hồi – Giải phóng};
+  \node[font=\small\bfseries,text=red] at ({(\xa+\xb)/2},{(\yb+\yc)/2}) {C++};
+  \node[anchor=west,text=red] at (\xb+0.1,{(\yb+\yc)/2}) {new};
+  \node[anchor=west,text=red] at (\xc+0.1,{(\yb+\yc)/2}) {delete};
+  \node at ({(\xa+\xb)/2},{(\yc+\yd)/2}) {C};
+  \node[anchor=west,align=left] at (\xb+0.1,{(\yc+\yd)/2}) {malloc()\\calloc()\\hoặc realloc()};
+  \node[anchor=west] at (\xc+0.1,{(\yc+\yd)/2}) {free()};
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 17
+\begin{frame}[fragile]{Cấp phát động}
+\begin{blk}{14.2}{1.14}{1.68}
+\begin{lstlisting}[linewidth=14.2cm,basicstyle=\cf{10}]
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int* p = new int;
+
+    if(p == NULL)
+    {
+        cout << "Cap phat khong thanh cong" << endl;
+    }
+
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\begin{slidepic}
+  \node[mem,minimum width=1.82cm] (v) at (12.03,2.97) {...};
+  \node[memaddr,above=1pt of v] (va) {\addr{f123}};
+  \node[memlbl,left=3pt of v,text=black] {...};
+  \node[mem,minimum width=1.8cm] (p) at (9.32,4.8) {0xf123};
+  \node[memaddr,above=1pt of p] {\addr{b369}};
+  \node[memlbl,left=3pt of p] {p};
+  \ptrto{p}{va}{14.52}
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 18
+\begin{frame}[fragile]{Cấp phát động}
+\begin{blk}{14.2}{1.14}{1.68}
+\begin{lstlisting}[linewidth=14.2cm,basicstyle=\cf{10}]
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int* p = new int;
+
+    if(p == NULL)
+    {
+        cout << (*@\vstr{"Cap phat không thanh cong"}@*) << endl;
+    }
+    (*@\hl{*p = \textcolor{codenum}{6789};}@*)
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\begin{slidepic}
+  \node[mem,minimum width=1.82cm] (v) at (12.03,2.97) {6789};
+  \node[memaddr,above=1pt of v] (va) {\addr{f123}};
+  \node[memlbl,left=3pt of v,text=black] {...};
+  \node[mem,minimum width=1.8cm] (p) at (9.32,4.8) {0xf123};
+  \node[memaddr,above=1pt of p] {\addr{b369}};
+  \node[memlbl,left=3pt of p] {p};
+  \ptrto{p}{va}{14.52}
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 19
+\begin{frame}{Vừa cấp phát động vừa khởi tạo giá trị}
+\begin{blk}{6}{1.2}{1.65}\sub{Cú pháp}\end{blk}
+\begin{blk}{14}{2.25}{2.8}\fontsize{12}{14}\selectfont\ttfamily
+\textcolor{codekw}{kiểu\_dữ\_liệu}\bk{* ten\_p = }\textcolor{codekw}{new kiểu\_dữ\_liệu}\bk{(}\textcolor{codenum}{giá\_trị}\bk{);}
+\end{blk}
+\begin{blk}{4}{1.1}{4.15}\begin{itemize}\small\item Ví dụ:\end{itemize}\end{blk}
+\begin{blk}{8}{1.2}{6.4}\fontsize{12}{14}\selectfont\ttfamily
+\textcolor{codekw}{int}\bk{* p = }\textcolor{codekw}{new int}\bk{(}\textcolor{codenum}{6789}\bk{);}
+\end{blk}
+\begin{blk}{8}{1.2}{7.6}\fontsize{12}{14}\selectfont\ttfamily
+\bk{cout << *p; }\textcolor{codecom}{//6789}
+\end{blk}
+\begin{slidepic}
+  \node[mem,minimum width=1.82cm] (v) at (12.03,4.72) {6789};
+  \node[memaddr,above=1pt of v] (va) {\addr{f123}};
+  \node[memlbl,left=3pt of v,text=black] {...};
+  \node[mem,minimum width=1.8cm] (p) at (9.32,6.65) {0xf123};
+  \node[memaddr,above=1pt of p] {\addr{b369}};
+  \node[memlbl,left=3pt of p] {p};
+  \ptrto{p}{va}{14.52}
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 20
+\begin{frame}[fragile]{Thu hồi – Giải phóng}
+\begin{blk}{14.5}{1.1}{1.6}
+\begin{itemize}[itemsep=3pt]\small
+\item Dùng toán tử \textbf{delete} để thu hồi vùng nhớ.
+\item Sau khi thu hồi vùng nhớ bằng delete thì \underline{\red{con trỏ vẫn trỏ đến vùng nhớ}}.
+\item Có thể gọi tham chiếu nhưng kết quả không lường trước được.
+\item => Hiện tượng \underline{lạc con trỏ}.
+\end{itemize}
+\end{blk}
+\begin{blk}{7.65}{0.16}{4.13}
+\begin{lstlisting}[style=red,basicstyle=\cf{10.8}]
+int* p = new int(6789);
+cout << "Gia tri p = " << p << endl;
+cout << *p << endl << endl; //6789
+
+delete p;
+cout << "Gia tri p = " << p << endl;
+cout << *p << endl; (*@\vcmt{//Giá trị ...}@*)
+\end{lstlisting}
+\end{blk}
+\begin{slidepic}
+  \node[mem,minimum width=1.82cm] (v) at (12.06,4.82) {6789};
+  \node[memaddr,above=1pt of v] (va) {\addr{f123}};
+  \node[memlbl,left=3pt of v,text=black] {...};
+  \node[mem,minimum width=1.82cm] (p) at (9.25,6.68) {0xf123};
+  \node[memaddr,above=1pt of p] {\addr{b369}};
+  \node[memlbl,left=3pt of p] {p};
+  \ptrto[ptrd]{p}{va}{14.5}
+  \node[fill=hlyellow,text=red,font=\fontsize{7}{8}\selectfont,inner sep=2pt] at (12.42,6.42) {Vẫn còn trỏ đến địa chỉ};
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 21
+\begin{frame}{Thu hồi – Giải phóng}
+\begin{blk}{6}{1.2}{1.65}\sub{Kết quả}\end{blk}
+\begin{slidepic}
+  \tikzset{res/.style={draw=boxred,align=left,anchor=north west,text width=3.0cm,
+     inner sep=3pt,font=\fontsize{7.5}{9}\selectfont,text=black,minimum height=1.93cm}}
+  \node[res] at (2.7,2.5) {Gia tri p = 0xe91970\\6789\\[6pt]Gia tri p = 0xe91970\\\red{15302288}};
+  \node[res] at (7.27,2.5) {Gia tri p = 0xf41970\\6789\\[6pt]Gia tri p = 0xf41970\\\red{16023184}};
+  \node[res] at (2.7,4.81) {Gia tri p = 0x781970\\6789\\[6pt]Gia tri p = 0x781970\\\red{7896720}};
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 22
+\begin{frame}[fragile]{Thu hồi – Giải phóng}
+\begin{blk}{14.5}{1.1}{1.6}
+\begin{itemize}[itemsep=3pt]\small
+\item Để tránh con trỏ bị thất lạc thì sau khi delete gán giá trị \textbf{NULL} cho con trỏ.
+\item Minh họa:
+\end{itemize}
+\end{blk}
+\begin{blk}{8.0}{1.44}{3.15}
+\begin{lstlisting}[style=red,basicstyle=\cf{10.5}]
+int* p = new int(6789);
+cout << "Gia tri p = " << p << endl;
+cout << *p << endl << endl; //6789
+
+delete p;
+p = NULL;
+
+cout << "Gia tri p = " << p << endl;
+//cout << *p << endl;
+\end{lstlisting}
+\end{blk}
+\begin{slidepic}
+  \node[mem,minimum width=1.8cm] (v) at (14.25,4.78) {...};
+  \node[memaddr,above=1pt of v] {\addr{f123}};
+  \node[memlbl,left=3pt of v,text=black] {...};
+  \node[mem,minimum width=1.78cm] (p) at (11.43,6.69) {NULL};
+  \node[memaddr,above=1pt of p] {\addr{b369}};
+  \node[memlbl,left=3pt of p] {p};
+\end{slidepic}
+\end{frame}
+
+% ---------------------------------------------------------------- 23
+\begin{frame}[fragile]{Con trỏ và hàm}
+\begin{blk}{14.5}{1.1}{1.6}
+\begin{itemize}[itemsep=3pt]\small
+\item Con trỏ có thể dùng làm \red{tham số} của hàm hoặc \red{kiểu dữ liệu} của hàm.
+\item Ví dụ:
+\end{itemize}
+\end{blk}
+\begin{blk}{7.66}{3.05}{2.09}
+\begin{lstlisting}[style=red,basicstyle=\cf{9.5}]
+int* input()
+{
+    int* pi = new int;
+    cout << "Nhap gia tri: ";
+    cin >> *pi;
+
+    return pi;
+}
+
+int main()
+{
+    int* p = input();
+    cout << "Gia tri = " << *p << endl;
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 24
+\begin{frame}[fragile]{Con trỏ và hàm}
+\begin{blk}{3}{1.1}{1.75}\begin{itemize}\small\item Ví dụ\end{itemize}\end{blk}
+\begin{blk}{12.4}{2.97}{1.63}
+\begin{lstlisting}[style=red,basicstyle=\cf{9.5}]
+void hoan_vi(int* a, int* b)
+{
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+int main()
+{
+    int x = 3, y = 6;
+    cout << "Truoc hoan vi. x = " << x << "   y = " << y << endl;
+
+    hoan_vi(&x, &y);
+    cout << "Sau   hoan vi. x = " << x << "   y = " << y << endl;
+
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 25
+\begin{frame}[fragile]{Con trỏ và mảng 1 chiều}
+\begin{blk}{8}{1.2}{1.7}\sub{Các địa chỉ trong mảng 1 chiều}\end{blk}
+\begin{blk}{8.5}{1.09}{2.69}
+\begin{lstlisting}[basicstyle=\cf{9.4}]
+int a[] = {5, 3, 7, 5, 9, 1};
+cout << "Dia chi mang: " << a << endl;
+for(int i = 0; i < 6; i++)
+{
+    cout << i << "   " << &a[i] << endl;
+}
+
+double b[] = {5.1, 3.6, 7.9, 5.3, 9.3, 1.9};
+cout << "Dia chi mang: " << b << endl;
+for(int i = 0; i < 6; i++)
+{
+    cout << i << "   " << &b[i] << endl;
+}
+\end{lstlisting}
+\end{blk}
+\begin{slidepic}
+  \node[draw=gray!60,anchor=north west,minimum width=4.3cm,minimum height=6.67cm] at (11.53,1.6) {};
+  \node[anchor=north west,align=left,text=black,font=\fontsize{9}{11.6}\selectfont,inner sep=3pt] at (11.53,1.62) {%
+  Dia chi mang: \hl{0x61fea0}\\
+  0\quad 0x61fea0\\ 1\quad 0x61fea4\\ 2\quad 0x61fea8\\ 3\quad 0x61feac\\ 4\quad 0x61feb0\\ 5\quad\, 0x61feb4\\[5pt]
+  Dia chi mang: \hl{0x61fe70}\\
+  0\quad 0x61fe70\\ 1\quad 0x61fe78\\ 2\quad 0x61fe80\\ 3\quad 0x61fe88\\ 4\quad 0x61fe90\\ 5\quad 0x61fe98};
+\end{slidepic}
+\end{frame}
+
+% Sơ đồ mảng a[] = {5,3,7,5,9,1} dùng cho slide 26-28
+% \arrdiagram{x0 (tâm ô đầu)}{y hàng địa chỉ}{y tâm ô}
+\newcommand{\arrdiagram}[3]{%
+  \foreach \v/\ad [count=\i from 0] in {5/0x61fea0,3/0x61fea4,7/0x61fea8,5/0x61feac,9/0x61feb0,1/0x61feb4}{
+    \node[font=\ttfamily\fontsize{7.5}{8}\selectfont,text=black] at (#1+\i*2.322,#2) {\ad};
+    \node[mem,minimum width=1.99cm,minimum height=0.71cm] at (#1+\i*2.322,#3) {\v};
+  }}
+\newcommand{\arrindex}[2]{%
+  \node[font=\fontsize{8}{9}\selectfont,text=red] at (0.79,#2) {index};
+  \foreach \i in {0,...,5}{\node[font=\fontsize{8}{9}\selectfont,text=red] at (#1+\i*2.322,#2) {\i};}}
+\newcommand{\arrp}[2]{%
+  \foreach \t [count=\i from 0] in {p - 1,\hl{p = \&a[1]},p + 1,p + 2,p + 3,p + 4}{
+    \node[font=\fontsize{8}{9}\selectfont,text=red] at (#1+\i*2.322,#2) {\t};}}
+
+% ---------------------------------------------------------------- 26
+\begin{frame}{Con trỏ và mảng 1 chiều}
+\begin{blk}{16}{0}{2.2}\centering\fontsize{12}{14}\selectfont\ttfamily
+\textcolor{codekw}{int}\bk{\ a[] = \{}\textcolor{codenum}{5}\bk{, }\textcolor{codenum}{3}\bk{, }\textcolor{codenum}{7}\bk{, }\textcolor{codenum}{5}\bk{, }\textcolor{codenum}{9}\bk{, }\textcolor{codenum}{1}\bk{\};}
+\end{blk}
+\begin{slidepic}
+  \arrindex{2.59}{3.26}
+  \arrdiagram{2.59}{4.0}{4.56}
+  \arrp{2.59}{5.6}
+\end{slidepic}
+\begin{blk}{14.2}{1.28}{6.0}\small
+Phép cộng và trừ hai địa chỉ con trỏ
+\begin{itemize}
+\item Khi con trỏ \red{cộng/trừ} với một \red{số nguyên}, địa chỉ của con trỏ sẽ tăng/giảm lên một số lượng bộ nhớ tương ứng với \red{số nguyên nhân vào kích thước của kiểu dữ liệu} mà con trỏ đang trỏ tới.
+\end{itemize}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 27
+\begin{frame}[fragile]{Con trỏ và mảng 1 chiều}
+\begin{blk}{16}{0}{2.2}\centering\fontsize{12}{14}\selectfont\ttfamily
+\textcolor{codekw}{int}\bk{\ a[] = \{}\textcolor{codenum}{5}\bk{, }\textcolor{codenum}{3}\bk{, }\textcolor{codenum}{7}\bk{, }\textcolor{codenum}{5}\bk{, }\textcolor{codenum}{9}\bk{, }\textcolor{codenum}{1}\bk{\};}
+\end{blk}
+\begin{slidepic}
+  \arrindex{2.51}{3.18}
+  \arrdiagram{2.51}{4.0}{4.51}
+  \arrp{2.51}{5.58}
+  \node[font=\small,anchor=west] at (1.23,6.61) {Ví dụ:};
+\end{slidepic}
+\begin{blk}{5.3}{2.81}{5.98}
+\begin{lstlisting}[basicstyle=\cf{9}]
+int a[] = {5, 3, 7, 5, 9, 1};
+
+int* p = &a[1];
+
+cout << *(p - 1) << endl;
+cout << *(p + 1) << endl;
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 28
+\begin{frame}[fragile]{Con trỏ và mảng 1 chiều}
+\begin{blk}{16}{0}{2.2}\centering\fontsize{12}{14}\selectfont\ttfamily
+\textcolor{codekw}{int}\bk{\ a[] = \{}\textcolor{codenum}{5}\bk{, }\textcolor{codenum}{3}\bk{, }\textcolor{codenum}{7}\bk{, }\textcolor{codenum}{5}\bk{, }\textcolor{codenum}{9}\bk{, }\textcolor{codenum}{1}\bk{\};}
+\end{blk}
+\begin{slidepic}
+  \arrdiagram{2.59}{4.0}{4.5}
+\end{slidepic}
+\begin{blk}{5.3}{1.66}{6.12}
+\begin{lstlisting}[basicstyle=\cf{10.5}]
+for(int i = 0; i < 6; i++)
+{
+    cout << a + i << endl;
+}
+\end{lstlisting}
+\end{blk}
+\begin{blk}{6.2}{8.91}{6.12}
+\begin{lstlisting}[basicstyle=\cf{10.5}]
+for(int i = 0; i < 6; i++)
+{
+    cout << (*@\hl{*(a + i)}@*) << endl;
+}
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 29
+\begin{frame}[fragile]{Xuất mảng}
+\begin{blk}{14}{1.1}{1.65}\begin{itemize}\small\item Hàm xuất mảng áp dụng kỹ thuật con trỏ\end{itemize}\end{blk}
+\begin{blk}{7.2}{1.09}{2.8}
+\begin{lstlisting}[basicstyle=\cf{10.8}]
+void xuat(int* a, int n)
+{
+    for(int i = 0; i < n; i++)
+    {
+        cout << (*@\hl{*(a + i)}@*) << endl;
+    }
+}
+\end{lstlisting}
+\end{blk}
+\begin{blk}{7.2}{8.58}{2.8}
+\begin{lstlisting}[basicstyle=\cf{10.3}]
+int main()
+{
+    int a[] = {5, 3, 7, 5, 9, 1};
+    int n = 6;
+
+    xuat(a, n);
+
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 30
+\begin{frame}[fragile]{Khởi tạo giá trị mảng}
+\begin{blk}{14}{1.1}{1.65}\begin{itemize}\small\item Hàm khởi tạo giá trị mảng áp dụng kỹ thuật con trỏ\end{itemize}\end{blk}
+\begin{blk}{5.94}{1.66}{2.8}
+\begin{lstlisting}[basicstyle=\cf{10}]
+void khoiTao(int* a, int& n)
+{
+    n = 6;
+    *(a + 0) = 3;
+    *(a + 1) = 1;
+    *(a + 2) = 6;
+    *(a + 3) = 9;
+    *(a + 4) = 7;
+    *(a + 5) = 8;
+}
+\end{lstlisting}
+\end{blk}
+\begin{blk}{4.1}{9.51}{2.8}
+\begin{lstlisting}[basicstyle=\cf{10}]
+int main()
+{
+    int a[100];
+    int n = 0;
+
+    khoiTao(a, n);
+    xuat(a, n);
+
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 31
+\begin{frame}[fragile]{Khởi tạo giá trị mảng}
+\begin{blk}{14}{1.1}{1.65}\begin{itemize}\small\item Hàm khởi tạo giá trị mảng áp dụng kỹ thuật con trỏ\end{itemize}\end{blk}
+\begin{blk}{9.6}{1.44}{2.63}
+\begin{lstlisting}[basicstyle=\cf{10.4}]
+void nhap(int* a, int& n)
+{
+    cout << "So luong can nhap: ";
+    cin >> n;
+    for(int i = 0; i < n; i++)
+    {
+        cout << "\tNhap a[" << i << "] = ";
+        cin >> *(a + i);
+    }
+}
+\end{lstlisting}
+\end{blk}
+\begin{blk}{4.1}{11.5}{2.63}
+\begin{lstlisting}[basicstyle=\cf{10.4}]
+int main()
+{
+    int a[100];
+    int n = 0;
+
+    nhap(a, n);
+    xuat(a, n);
+
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 32
+\begin{frame}[fragile]{Con trỏ và mảng 1 chiều}
+\begin{blk}{12}{1.3}{1.65}\sub{Cú pháp cấp phát bộ nhớ cho mảng 1 chiều}\end{blk}
+\begin{blk}{14}{2.15}{2.75}\fontsize{12}{14}\selectfont\ttfamily
+\textcolor{codekw}{Kiểu\_Dữ\_Liệu}\bk{* ten\_mang = }\textcolor{codekw}{new Kiểu\_Dữ\_Liệu}\bk{[}\textcolor{codenum}{kích\_thước}\bk{];}
+\end{blk}
+\begin{blk}{3}{1.1}{4.15}\begin{itemize}\small\item Ví dụ:\end{itemize}\end{blk}
+\begin{blk}{8.04}{4.06}{4.21}
+\begin{lstlisting}[style=red,basicstyle=\cf{10.6}]
+int main()
+{
+    int* a = new int[100];
+    int n = 0;
+
+    khoiTao(a, n);
+    xuat(a, n);
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 33
+\begin{frame}[fragile]{Tính tổng: áp dụng con trỏ mảng}
+\begin{blk}{14}{1.2}{1.65}
+\sub{Yêu cầu:} \small Viết hàm tính tổng các giá trị trong mảng?\par
+Phân tích:
+\begin{itemize}[itemsep=2pt]
+\item Input:
+  \begin{itemize}\fontsize{8.5}{10}\selectfont
+  \item[\tiny$\blacksquare$] Mảng a \hspace{1.45cm} => \hl{int*} a
+  \item[\tiny$\blacksquare$] Số lượng n \hspace{0.75cm} => int n
+  \end{itemize}
+\item Output:
+  \begin{itemize}\fontsize{8.5}{10}\selectfont
+  \item[\tiny$\blacksquare$] Tổng các giá trị => return giá trị
+  \end{itemize}
+\end{itemize}
+\end{blk}
+\begin{blk}{7.08}{8.12}{2.74}
+\begin{lstlisting}[style=red,basicstyle=\cf{11.5}]
+int tinhTong(int* a, int n)
+{
+    int t = 0;
+    for(int i = 0; i < n; i++)
+    {
+        t = t + (*@\hl{*(a + i);}@*)
+    }
+    return t;
+}
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 34
+\begin{frame}[fragile]{Bài tập nhỏ}
+\begin{blk}{9.57}{4.06}{2.47}
+\begin{lstlisting}[basicstyle=\cf{11.3}]
+#include <iostream>
+using namespace std;
+int main()
+{
+    int a[] = {1, 3, 5, 7, 9, 2, 4, 6, 8};
+    cout << *(a + 3) + *(a + 7);
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\begin{blk}{5}{1.33}{7.7}\fontsize{8}{9}\selectfont\bfseries\itshape Nguồn: Đề thi\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 35
+\begin{frame}{Con trỏ và cấu trúc}
+\begin{blk}{14}{1.2}{1.65}
+\sub{Khai báo}\par
+\hspace*{3.95cm}{\ttfamily\fontsize{12}{14}\selectfont\textcolor{codekw}{Kiểu\_Cấu\_Trúc}\bk{* ten\_bien;}}\par\vspace{0.85cm}
+Cấp phát\par\vspace{2pt}
+\hspace*{3.0cm}{\ttfamily\fontsize{12}{14}\selectfont\bk{ten\_bien = }\textcolor{codekw}{new}\bk{\ Kiểu\_Cấu\_Trúc();}}\par\vspace{0.75cm}
+Vừa khai báo vừa cấp phát\par\vspace{2pt}
+\hspace*{1.6cm}{\ttfamily\fontsize{12}{14}\selectfont\textcolor{codekw}{Kiểu\_Cấu\_Trúc}\bk{* ten\_bien = }\textcolor{codekw}{new}\bk{\ Kiểu\_Cấu\_Trúc();}}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 36
+\begin{frame}[fragile]{Truy xuất thuộc tính}
+\begin{blk}{6}{1.3}{1.65}\sub{Phương pháp}\end{blk}
+\begin{blk}{16}{0}{2.2}\centering\fontsize{12}{14}\selectfont\ttfamily
+\bk{ten\_bien}\textcolor{red}{\textbf{->}}\bk{thuoc\_tinh}
+\end{blk}
+\begin{blk}{3}{1.1}{2.85}\begin{itemize}\small\item Ví dụ:\end{itemize}\end{blk}
+\begin{blk}{8.2}{3.02}{2.88}
+\begin{lstlisting}[basicstyle=\cf{9}]
+struct Diem
+{
+    int x;
+    int y;
+};
+int main()
+{
+    Diem a = {3, 5};
+    Diem* p = &a;
+
+    cout << "Hoanh do x = " << p->x << endl;
+    cout << "Tung do  y = " << p->y << endl;
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 37
+\begin{frame}[fragile]{Truy xuất thuộc tính}
+\begin{blk}{3}{1.3}{1.75}\sub{Minh họa}\end{blk}
+\begin{blk}{9.9}{3.52}{1.64}
+\begin{lstlisting}[basicstyle=\cf{10.6}]
+void xuat(Diem d)
+{
+    cout << "(" << d.x << "; " << d.y << ")\n";
+}
+\end{lstlisting}
+\end{blk}
+\begin{blk}{9.9}{3.52}{3.5}
+\begin{lstlisting}[basicstyle=\cf{10.3}]
+Diem* b = new Diem;
+b->x = 6;
+b->y = 8;
+
+xuat(*b);
+
+Diem* c = new Diem;
+(*c).x = 7;
+(*c).y = 9;
+
+xuat(*c);
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 38
+\begin{frame}[fragile]{Vừa cấp phát vừa khởi tạo}
+\begin{blk}{3}{1.3}{1.75}\sub{Minh họa}\end{blk}
+\begin{blk}{6.84}{4.25}{2.55}
+\begin{lstlisting}[basicstyle=\cf{11}]
+Diem* d = new Diem({1, 3});
+
+xuat(*d);
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 39
+\begin{frame}[fragile]{Cấp phát mảng cấu trúc}
+\begin{blk}{3}{1.2}{1.65}\sub{Minh họa}\end{blk}
+\begin{blk}{6.37}{1.09}{2.23}
+\begin{lstlisting}[basicstyle=\cf{9.7}]
+void khoiTao(Diem* d, int& n)
+{
+    n = 3;
+    *(d + 0) = {1, 2};
+    *(d + 1) = {2, 6};
+    *(d + 2) = {3, 1};
+}
+\end{lstlisting}
+\end{blk}
+\begin{blk}{6.37}{1.09}{5.36}
+\begin{lstlisting}[basicstyle=\cf{9.7}]
+void xuatMang(Diem* d, int n)
+{
+    for(int i = 0; i < n; i++)
+    {
+        xuat(*(d + i));
+    }
+}
+\end{lstlisting}
+\end{blk}
+\begin{blk}{6.32}{8.58}{2.23}
+\begin{lstlisting}[basicstyle=\cf{9.6}]
+int main()
+{
+    Diem* arr = new Diem[100];
+    int n = 0;
+
+    khoiTao(arr, n);
+    xuatMang(arr, n);
+
+    return 0;
+}
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 40
+\begin{frame}[fragile]{Đệ quy tự trỏ}
+\begin{blk}{3}{1.3}{1.75}\sub{Minh họa}\end{blk}
+\begin{blk}{4.41}{5.89}{1.98}
+\begin{lstlisting}[basicstyle=\cf{11.6}]
+struct Node
+{
+    int data;
+    Node* pNext;
+};
+\end{lstlisting}
+\end{blk}
+\begin{blk}{4.41}{5.89}{5.17}
+\begin{lstlisting}[basicstyle=\cf{11.6}]
+struct NODE
+{
+    int data;
+    NODE* pLeft;
+    NODE* pRight;
+};
+\end{lstlisting}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 41
+\begin{frame}{Áp dụng con trỏ cho mảng 1 chiều}
+\begin{blk}{13.4}{1.2}{1.72}\fontsize{11.5}{13.8}\selectfont
+\red{\textbf{BÀI 1}}\par
+Xây dựng mảng 1 chiều lưu trữ các số thực. Sau đó, viết hàm thực hiện các chức năng sau:
+\begin{enumerate}[label=\arabic*.,leftmargin=1.55em,labelindent=0pt,labelsep=0.35em,align=left,itemsep=4pt]
+\item Tạo giá trị ngẫu nhiên (số thực, 2 chữ số sau dấu chấm) thuộc khoảng (-268; 339). Số lượng thuộc đoạn [10; 20]
+\item Xuất (in) mảng vừa tạo.
+\item Tính tổng các giá trị có trong mảng.
+\item Tính tổng, tích các giá trị có trong mảng (viết 1 hàm).
+\item Đếm số lần xuất hiện 1 phần tử x bất kỳ.
+\end{enumerate}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 42
+\begin{frame}{Áp dụng con trỏ cho mảng 1 chiều}
+\begin{blk}{13.4}{1.2}{1.72}\fontsize{11.5}{13.8}\selectfont
+\red{\textbf{BÀI 1}} \textit{(Tiếp theo)}\par
+Xây dựng mảng 1 chiều lưu trữ các số thực. Sau đó, viết hàm thực hiện các chức năng sau:
+\begin{enumerate}[label=\arabic*.,leftmargin=1.55em,labelindent=0pt,labelsep=0.35em,align=left,itemsep=4pt,start=6]
+\item Trả về các phần tử chẵn (chẵn-lẻ dựa vào giá trị nguyên của số thực) có trong mảng.
+\item Tìm vị trí phần tử nhỏ nhất trong mảng.
+\item Tạo một mảng đảo ngược.
+\item Trả về các số âm trong mảng.
+\item Trả về số lượng các giá trị trong mảng một chiều thuộc đoạn [x, y].
+\item Trả về các giá trị trong mảng một chiều thuộc đoạn [x, y].
+\end{enumerate}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 43
+\begin{frame}{Bài tập}
+\begin{blk}{13.4}{1.2}{1.72}\fontsize{11.5}{13.8}\selectfont
+\sub{Bài 2}\par
+Áp dụng kỹ thuật cấp phát động cho mảng một chiều. Viết HÀM thực hiện các yêu cầu sau:
+\begin{enumerate}[label=\arabic*.,leftmargin=1.55em,labelindent=0pt,labelsep=0.35em,align=left,itemsep=4pt]
+\item Tạo mảng số thực có các giá trị sau: | 0.8 | 5.6 | 9.1 | 7.3 | 10 | 5.9 | 7.2 | 9.3 | 8.0 | 8.7 |
+\item Xuất mảng (in) ra màn hình.
+\item Kiểm tra mảng có toàn dương.
+\item[6.] Kiểm tra mảng có đối xứng.
+\item[7.] Kiểm tra trong mảng có chứa số nguyên tố, số chính phương.
+\item[8.] Tìm một giá trị có trong mảng.
+\end{enumerate}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 44
+\begin{frame}{Bài tập}
+\begin{blk}{13.4}{1.2}{1.72}\fontsize{11.5}{13.8}\selectfont
+\sub{Bài 2} \textit{(tiếp theo…)}\par\vspace{0.6cm}
+\begin{enumerate}[label=\arabic*.,leftmargin=1.55em,labelindent=0pt,labelsep=0.35em,align=left,itemsep=4pt,start=9]
+\item Tìm các số nguyên tố có trong mảng.
+\item Tìm các số chính phương có trong mảng.
+\item Trả về các số âm trong mảng.
+\item Tìm các số dương trong mảng và tính tổng của chúng.
+\item Đảo ngược các phần tử trong mảng.
+\end{enumerate}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 45
+\begin{frame}{Bài tập}
+\begin{blk}{13.4}{1.2}{1.72}\fontsize{11.5}{13.8}\selectfont
+\sub{Bài 3}\par
+Viết chương trình quản lý và tính tiền lương cho các nhân viên trong một công ty. Nhân viên có các thông tin sau: mã nhân viên, họ tên, lương cơ bản, số ngày làm và lương hằng tháng.\par\vspace{3pt}
+Công thức tính tiền lương hằng tháng cho nhân viên như sau:\par\vspace{3pt}
+\hspace*{1.0cm}Lương hằng tháng = lương căn bản + số ngày làm việc * 180.000 đ\par\vspace{3pt}
+\hspace*{1.0cm}Nếu lương hằng tháng hơn 8.000.000 thì thưởng thêm 5\%.\par\vspace{3pt}
+\hspace*{1.0cm}Nếu lương cơ bản dưới 5.000.000 thì phụ cấp\, thêm 10\%.\par\vspace{3pt}
+Áp dụng cấp phát động. Xây dựng chương trình đáp ứng các yêu cầu sau:
+\begin{enumerate}[label=\arabic*.,leftmargin=1.55em,labelindent=0pt,labelsep=0.35em,align=left,itemsep=4pt]
+\item Tạo dữ liệu các nhân viên dùng để kiểm thử (10 nhân viên)
+\item Xuất danh sách nhân viên trong công ty.
+\end{enumerate}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 46
+\begin{frame}{Bài tập}
+\begin{blk}{13.4}{1.2}{1.72}\fontsize{11.5}{13.8}\selectfont
+\sub{Bài 3} \textit{(tiếp theo…)}\par
+Chương trình đáp ứng các yêu cầu sau:
+\begin{enumerate}[label=\arabic*.,leftmargin=1.55em,labelindent=0pt,labelsep=0.35em,align=left,itemsep=4pt,start=3]
+\item Tính và cập nhật tiền lương cho các loại nhân viên.
+\item Tính tổng lương hằng tháng mà công ty phải trả cho toàn bộ nhân viên.
+\item \ Tính tổng lương hằng tháng các nhân viên có lương cơ bản < 5 triệu.
+\item Tìm nhân viên theo theo mã nhân viên.
+\item Tìm các nhân viên có lương hằng tháng thấp nhất.
+\item Tìm các nhân viên có lương cơ bản cao nhất cao nhất.
+\end{enumerate}
+\end{blk}
+\end{frame}
+
+% ---------------------------------------------------------------- 47, 48
+\ThankYouSlide
+\QandASlide
