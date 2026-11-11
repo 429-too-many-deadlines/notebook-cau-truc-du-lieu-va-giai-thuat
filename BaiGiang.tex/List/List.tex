@@ -1,0 +1,1223 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{mathptmx} % Font Times New Roman
+\usepackage[a4paper,top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,shapes.multipart,arrows.meta,positioning,calc,fit}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{needspace}
+\usepackage{setspace}
+\setstretch{1.14}
+
+% Định nghĩa màu sắc (đồng bộ với hệ thống bài giảng)
+\definecolor{codegreen}{rgb}{0,0.5,0}
+\definecolor{codegray}{rgb}{0.4,0.4,0.4}
+\definecolor{codepurple}{rgb}{0.55,0,0.85}
+\definecolor{codeblue}{rgb}{0.0,0.22,0.65}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.98}
+\definecolor{addrcolor}{rgb}{0.75,0.0,0.0}
+\definecolor{stepblue}{rgb}{0.1,0.2,0.7}
+
+% Thiết lập listings cho C++
+\lstset{
+    language=C++,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{codeblue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\fontfamily{pcr}\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=6pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4,
+    frame=single,
+    rulecolor=\color{codegray!35},
+    aboveskip=0.5em,
+    belowskip=0.5em,
+    escapeinside={(*@}{@*)}
+}
+
+% Định dạng tiêu đề các mục
+\usepackage{titlesec}
+\titleformat{\section}{\Large\bfseries\color{codeblue}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries}{\thesubsubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\titlespacing*{\subsection}{0pt}{1.0em}{0.4em}
+\titlespacing*{\subsubsection}{0pt}{0.8em}{0.3em}
+
+\begin{document}
+
+\begin{center}
+    {\large \textbf{BÀI GIẢNG HỌC PHẦN: CẤU TRÚC DỮ LIỆU VÀ GIẢI THUẬT}}\\[0.25em]
+    {\LARGE \textbf{\color{codeblue}CHUYÊN ĐỀ: DANH SÁCH LIÊN KẾT ĐƠN}}\\[0.35em]
+    \rule{\textwidth}{1pt}
+\end{center}
+
+\vspace{-0.6em}
+
+\section*{TỔNG QUAN NỘI DUNG BÀI HỌC}
+\begin{enumerate}[leftmargin=2.5em, itemsep=0.05em]
+    \item Ý tưởng -- Giải pháp
+    \item Kiến trúc danh sách liên kết đơn
+    \item Các bước xây dựng
+    \item Các thao tác
+    \item Bài tập
+\end{enumerate}
+
+\vspace{0.4em}
+\hrule
+\vspace{0.8em}
+
+% ==============================================================================
+\section{Ý Tưởng -- Giải Pháp}
+% ==============================================================================
+
+\subsection{Vấn đề 1: Lưu trữ một số lượng nhỏ các giá trị}
+\textbf{Bài toán đặt ra:} Muốn lưu trữ các số: \texttt{10}, \texttt{79}, \texttt{39}, \texttt{66}, \texttt{26}, \texttt{50} thì chúng ta làm sao?
+
+\noindent Một cách tiếp cận đơn giản là khai báo các biến rời rạc tương ứng cho từng giá trị:
+\begin{center}
+\begin{tabular}{cccccc}
+    \texttt{10} & \texttt{79} & \texttt{39} & \texttt{66} & \texttt{26} & \texttt{50} \\
+    \texttt{x}  & \texttt{y}  & \texttt{z}  & \texttt{t}  & \texttt{g}  & \texttt{h}
+\end{tabular}
+\end{center}
+
+\subsection{Vấn đề 2: Lưu trữ nhiều số hơn}
+\textbf{Bài toán đặt ra:} Muốn lưu trữ nhiều số hơn nữa thì làm sao?
+
+\noindent Giải pháp quen thuộc là sử dụng \textbf{mảng một chiều} (ví dụ cấp phát mảng gồm 500 phần tử có chỉ số từ \texttt{0} đến \texttt{499}):
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|>{\bfseries}l|c|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{index} & 0 & 1 & 2 & 3 & 4 & 5 & 6 & \dots & 499 \\
+\hline
+\textbf{value} & 10 & 79 & 39 & 66 & 26 & 50 &  & \dots &  \\
+\hline
+\end{tabular}
+\caption{Minh họa lưu trữ dãy số bằng mảng một chiều.}
+\end{table}
+
+\noindent\textbf{Câu hỏi mở:} \textit{Có giải pháp nào tốt hơn nữa không?} (Việc cấp phát mảng cố định kích thước có thể gây dư thừa vùng nhớ chưa dùng đến hoặc không đủ chỗ khi số lượng phần tử tăng thêm $\Rightarrow$ cần cấu trúc dữ liệu cấp phát linh hoạt theo từng phần tử là \textbf{Danh sách liên kết đơn}).
+
+% ==============================================================================
+\section{Kiến Trúc Danh Sách Liên Kết Đơn}
+% ==============================================================================
+
+Xét nhu cầu lưu trữ dãy các số nguyên: \texttt{10}, \texttt{79}, \texttt{39}, \texttt{66}, \texttt{26}.
+
+Thay vì lưu các phần tử liên tiếp nhau trong bộ nhớ như mảng một chiều, mỗi phần tử trong \textbf{danh sách liên kết đơn} được đóng gói thành một \textbf{Node} gồm hai thành phần:
+\begin{itemize}[itemsep=0.15em]
+    \item \texttt{data}: Lưu trữ dữ liệu (giá trị) của phần tử.
+    \item \texttt{pNext}: Con trỏ lưu địa chỉ của \texttt{Node} kế tiếp trong danh sách (Node cuối cùng trỏ tới \texttt{NULL}).
+\end{itemize}
+Toàn bộ danh sách được quản lý thông qua hai con trỏ đặc biệt:
+\begin{itemize}[itemsep=0.15em]
+    \item \texttt{pHead}: Con trỏ trỏ đến \texttt{Node} đầu tiên của danh sách.
+    \item \texttt{pTail}: Con trỏ trỏ đến \texttt{Node} cuối cùng của danh sách.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    nbox/.style={rectangle, draw=blue!70!black, fill=white, minimum width=0.82cm, minimum height=0.5cm, font=\small, inner sep=2pt},
+    pbox/.style={rectangle, draw=orange!80!black, fill=white, minimum width=0.82cm, minimum height=0.5cm, font=\footnotesize, inner sep=2pt},
+    lbl/.style={font=\ttfamily\tiny, text=codeblue},
+    addr/.style={font=\ttfamily\footnotesize, text=addrcolor},
+    ptr/.style={font=\bfseries\small, text=addrcolor}
+]
+% Các giá trị gốc phía trên
+\foreach \val/\x in {10/0, 79/3.0, 39/6.0, 66/9.0, 26/12.0} {
+    \node[font=\bfseries\color{codeblue}] at (\x+0.42, 1.85) {\val};
+}
+
+% Node 1: 0xb12
+\node[nbox] (d1) at (0, 0) {10};
+\node[pbox, right=0.05cm of d1] (n1) {a78};
+\node[lbl, anchor=south] at (d1.north) {data};
+\node[lbl, anchor=south] at (n1.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d1)(n1), yshift=0.14cm] (b1) {};
+\node[addr, anchor=south] at (b1.north) {0xb12};
+
+% Node 2: 0xa78
+\node[nbox] (d2) at (3.0, 0) {79};
+\node[pbox, right=0.05cm of d2] (n2) {d56};
+\node[lbl, anchor=south] at (d2.north) {data};
+\node[lbl, anchor=south] at (n2.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d2)(n2), yshift=0.14cm] (b2) {};
+\node[addr, anchor=south] at (b2.north) {0xa78};
+
+% Node 3: 0xd56
+\node[nbox] (d3) at (6.0, 0) {39};
+\node[pbox, right=0.05cm of d3] (n3) {c95};
+\node[lbl, anchor=south] at (d3.north) {data};
+\node[lbl, anchor=south] at (n3.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d3)(n3), yshift=0.14cm] (b3) {};
+\node[addr, anchor=south] at (b3.north) {0xd56};
+
+% Node 4: 0xc95
+\node[nbox] (d4) at (9.0, 0) {66};
+\node[pbox, right=0.05cm of d4] (n4) {a36};
+\node[lbl, anchor=south] at (d4.north) {data};
+\node[lbl, anchor=south] at (n4.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d4)(n4), yshift=0.14cm] (b4) {};
+\node[addr, anchor=south] at (b4.north) {0xc95};
+
+% Node 5: 0xa36
+\node[nbox] (d5) at (12.0, 0) {26};
+\node[pbox, fill=yellow!80, right=0.05cm of d5] (n5) {NULL};
+\node[lbl, anchor=south] at (d5.north) {data};
+\node[lbl, anchor=south] at (n5.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d5)(n5), yshift=0.14cm] (b5) {};
+\node[addr, anchor=south] at (b5.north) {0xa36};
+
+% Mũi tên liên kết xanh lá giữa các Node
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (n1.east) to[out=70, in=135, looseness=1.1] (b2.north west);
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (n2.east) to[out=70, in=135, looseness=1.1] (b3.north west);
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (n3.east) to[out=70, in=135, looseness=1.1] (b4.north west);
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (n4.east) to[out=70, in=135, looseness=1.1] (b5.north west);
+
+% pHead và pTail
+\node[ptr, below=0.45cm of b1] {pHead};
+\node[ptr, below=0.45cm of b5] {pTail};
+\end{tikzpicture}
+\caption{Kiến trúc danh sách liên kết đơn trong bộ nhớ.}
+\end{figure}
+
+% ==============================================================================
+\section{Các Bước Xây Dựng Danh Sách Liên Kết Đơn}
+% ==============================================================================
+
+\subsection{Quy trình 4 bước xây dựng}
+
+\begin{enumerate}[leftmargin=2.2em, itemsep=0.5em]
+    \item \textbf{Bước \#1: Tạo cấu trúc Node}
+    \begin{itemize}[itemsep=0.15em]
+        \item Mỗi \texttt{Node} chứa dữ liệu (\texttt{int data}) và con trỏ trỏ tới Node kế tiếp (\texttt{Node* pNext}).
+    \end{itemize}
+\begin{lstlisting}
+struct Node{
+    int data;
+    Node* pNext;
+};
+\end{lstlisting}
+
+    \item \textbf{Bước \#2: Khởi tạo Node từ \texttt{value}} \textit{(Viết hàm chuyển \texttt{value} thành \texttt{Node})}
+    \begin{itemize}[itemsep=0.15em]
+        \item Cấp phát động một \texttt{Node} mới, gán \texttt{data = value}, con trỏ \texttt{pNext = NULL} và trả về địa chỉ \texttt{Node} vừa tạo (ví dụ: Node tại \texttt{0xb12} có \texttt{data = 10}, \texttt{pNext = NULL}).
+    \end{itemize}
+\begin{lstlisting}
+Node* initNode(int value)
+{
+    Node* p = new Node;
+
+    p->data = value;
+    p->pNext = NULL;
+    return p;
+}
+\end{lstlisting}
+
+    \needspace{4.5cm}
+    \item \textbf{Bước \#3: Tạo cấu trúc \texttt{List}}
+    \begin{itemize}[itemsep=0.15em]
+        \item Cấu trúc \texttt{List} quản lý danh sách thông qua hai con trỏ \texttt{pHead} và \texttt{pTail}.
+    \end{itemize}
+\begin{lstlisting}
+struct List
+{
+    Node* pHead;
+    Node* pTail;
+};
+\end{lstlisting}
+
+    \item \textbf{Bước \#4: Khởi tạo \texttt{List}}
+    \begin{itemize}[itemsep=0.15em]
+        \item Khi danh sách mới tạo chưa có phần tử nào (danh sách rỗng), cả \texttt{pHead} và \texttt{pTail} đều trỏ về \texttt{NULL}.
+    \end{itemize}
+\begin{lstlisting}
+void initList(List& l)
+{
+    l.pHead = NULL;
+    l.pTail = NULL;
+}
+\end{lstlisting}
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    nbox/.style={rectangle, draw=blue!70!black, fill=white, minimum width=0.85cm, minimum height=0.5cm, font=\small, inner sep=2pt},
+    pbox/.style={rectangle, draw=orange!80!black, fill=white, minimum width=0.85cm, minimum height=0.5cm, font=\footnotesize, inner sep=2pt},
+    lbl/.style={font=\ttfamily\tiny, text=codeblue},
+    addr/.style={font=\ttfamily\footnotesize, text=addrcolor}
+]
+% Bước 1: Khung Node mẫu
+\node[font=\bfseries\small\color{codeblue}] at (0.45, 1.55) {Bước \#1: Cấu trúc Node};
+\node[nbox] (s1d) at (0, 0) {\dots};
+\node[pbox, right=0.05cm of s1d] (s1n) {\dots};
+\node[lbl, anchor=south] at (s1d.north) {data};
+\node[lbl, anchor=south] at (s1n.north) {pNext};
+
+% Bước 2: Node 0xb12 (10 | NULL)
+\begin{scope}[xshift=4.8cm]
+\node[font=\bfseries\small\color{codeblue}] at (0.45, 1.55) {Bước \#2: Khởi tạo Node};
+\node[nbox] (s2d) at (0, 0) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of s2d] (s2n) {NULL};
+\node[lbl, anchor=south] at (s2d.north) {data};
+\node[lbl, anchor=south] at (s2n.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(s2d)(s2n), yshift=0.14cm] (s2b) {};
+\node[addr, anchor=south] at (s2b.north) {0xb12};
+\end{scope}
+
+% Bước 3: Cấu trúc List
+\begin{scope}[xshift=9.2cm]
+\node[font=\bfseries\small\color{codeblue}] at (2.1, 1.55) {Bước \#3: Cấu trúc List};
+\foreach \i in {0,1,2,3,4} {
+    \node[ellipse, draw=orange!80!black, thick, fill=yellow!15, minimum width=0.75cm, minimum height=0.45cm] (ln\i) at (\i*1.05, 0.1) {};
+}
+\draw[thick, blue!70!black] (ln0) -- (ln1) -- (ln2) -- (ln3) -- (ln4);
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.25cm of ln0] {pHead};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.25cm of ln4] {pTail};
+\end{scope}
+\end{tikzpicture}
+\caption{Minh họa trực quan các bước cấu trúc Node và List.}
+\end{figure}
+
+\subsection{Khai báo -- Khởi tạo Node và List}
+\begin{itemize}[itemsep=0.25em]
+    \item \textbf{Khai báo danh sách và khởi tạo danh sách:}
+\begin{lstlisting}
+List l;
+initList(l);
+\end{lstlisting}
+    Lúc này danh sách rỗng: \texttt{pHead => NULL}, \texttt{pTail => NULL}.
+
+    \item \textbf{Khai báo Node và khởi tạo Node:}
+\begin{lstlisting}
+Node* p1 = initNode(10);
+Node* p2 = initNode(79);
+Node* p3 = initNode(39);
+\end{lstlisting}
+    Mỗi lần gọi \texttt{initNode}, một vùng nhớ động cho \texttt{Node} được cấp phát độc lập (ví dụ \texttt{p1} tại \texttt{0xb12} có \texttt{data = 10}, \texttt{pNext = NULL}).
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    nbox/.style={rectangle, draw=blue!70!black, fill=white, minimum width=0.85cm, minimum height=0.5cm, font=\small, inner sep=2pt},
+    pbox/.style={rectangle, draw=orange!80!black, fill=white, minimum width=0.85cm, minimum height=0.5cm, font=\footnotesize, inner sep=2pt},
+    lbl/.style={font=\ttfamily\tiny, text=codeblue},
+    addr/.style={font=\ttfamily\footnotesize, text=addrcolor}
+]
+% List rỗng
+\node[font=\bfseries\small\color{codeblue}] at (0.45, 1.45) {Danh sách rỗng};
+\node[nbox, text=red] (ed) at (0, 0.15) {\dots};
+\node[pbox, fill=yellow!80, text=red, right=0.05cm of ed] (en) {\dots};
+\node[lbl, anchor=south] at (ed.north) {data};
+\node[lbl, anchor=south] at (en.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(ed)(en), yshift=0.14cm] (eb) {};
+\node[font=\ttfamily\footnotesize, text=codeblue, anchor=south] at (eb.north) {NULL};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.25cm of eb] (ep1) {pHead => \color{codeblue}NULL};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.05cm of ep1] {pTail => \color{codeblue}NULL};
+
+% Node p1 khởi tạo
+\begin{scope}[xshift=6.5cm]
+\node[font=\bfseries\small\color{codeblue}] at (0.45, 1.45) {Node \texttt{p1 = initNode(10)}};
+\node[nbox] (nd) at (0, 0.15) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of nd] (nn) {NULL};
+\node[lbl, anchor=south] at (nd.north) {data};
+\node[lbl, anchor=south] at (nn.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(nd)(nn), yshift=0.14cm] (nb) {};
+\node[addr, anchor=south] at (nb.north) {0xb12};
+\end{scope}
+\end{tikzpicture}
+\caption{Trạng thái sau khi khởi tạo danh sách rỗng và khởi tạo một Node.}
+\end{figure}
+
+% ==============================================================================
+\section{Các Thao Tác Trên Danh Sách Liên Kết Đơn}
+% ==============================================================================
+
+\subsection{Tổng quan quá trình thêm Node vào List}
+Xét dãy giá trị cần đưa vào danh sách theo thứ tự: \texttt{10}, \texttt{79}, \texttt{39}, \texttt{50}, \texttt{26}. Với mỗi giá trị, ta tạo một Node mới bằng \texttt{Node* p = initNode(...);} rồi gọi \texttt{addHead(l, p)} (thêm vào đầu) hoặc \texttt{addTail(l, p)} (thêm vào cuối):
+
+\begin{enumerate}[itemsep=0.25em]
+    \item Giá trị \textbf{\texttt{10}}: Gọi \texttt{addTail(l, p);} hoặc \texttt{addHead(l, p);} (vì danh sách đang rỗng) $\Rightarrow$ \texttt{(10)}.
+    \item Giá trị \textbf{\texttt{79}}: Gọi \texttt{addHead(l, p);} $\Rightarrow$ \texttt{(79) -- (10)}.
+    \item Giá trị \textbf{\texttt{39}}: Gọi \texttt{addTail(l, p);} $\Rightarrow$ \texttt{(79) -- (10) -- (39)}.
+    \item Giá trị \textbf{\texttt{50}}: Gọi \texttt{addHead(l, p);} $\Rightarrow$ \texttt{(50) -- (79) -- (10) -- (39)}.
+    \item Giá trị \textbf{\texttt{26}}: Gọi \texttt{addTail(l, p);} $\Rightarrow$ \texttt{(50) -- (79) -- (10) -- (39) -- (26)}.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    vnode/.style={ellipse, draw=orange!80!black, thick, fill=white, minimum width=0.95cm, minimum height=0.52cm, font=\small},
+    cmd/.style={font=\ttfamily\footnotesize, fill=yellow!70, inner sep=2pt, rounded corners=2pt},
+    lbl/.style={font=\bfseries\small, text=codeblue, anchor=east}
+]
+% Bước 1: 10
+\node[lbl] at (-1.5, 0) {Bước 1 (10):};
+\node[cmd] at (0.3, 0) {addTail / addHead};
+\node[vnode] (s1_1) at (3.2, 0) {10};
+
+% Bước 2: 79
+\node[lbl] at (-1.5, -0.95) {Bước 2 (79):};
+\node[cmd] at (0.3, -0.95) {addHead(l, p)};
+\node[vnode] (s2_1) at (3.2, -0.95) {79};
+\node[vnode] (s2_2) at (5.0, -0.95) {10};
+\draw[thick, blue!70!black] (s2_1) -- (s2_2);
+
+% Bước 3: 39
+\node[lbl] at (-1.5, -1.9) {Bước 3 (39):};
+\node[cmd] at (0.3, -1.9) {addTail(l, p)};
+\node[vnode] (s3_1) at (3.2, -1.9) {79};
+\node[vnode] (s3_2) at (5.0, -1.9) {10};
+\node[vnode] (s3_3) at (6.8, -1.9) {39};
+\draw[thick, blue!70!black] (s3_1) -- (s3_2) -- (s3_3);
+
+% Bước 4: 50
+\node[lbl] at (-1.5, -2.85) {Bước 4 (50):};
+\node[cmd] at (0.3, -2.85) {addHead(l, p)};
+\node[vnode] (s4_1) at (3.2, -2.85) {50};
+\node[vnode] (s4_2) at (5.0, -2.85) {79};
+\node[vnode] (s4_3) at (6.8, -2.85) {10};
+\node[vnode] (s4_4) at (8.6, -2.85) {39};
+\draw[thick, blue!70!black] (s4_1) -- (s4_2) -- (s4_3) -- (s4_4);
+
+% Bước 5: 26
+\node[lbl] at (-1.5, -3.8) {Bước 5 (26):};
+\node[cmd] at (0.3, -3.8) {addTail(l, p)};
+\node[vnode] (s5_1) at (3.2, -3.8) {50};
+\node[vnode] (s5_2) at (5.0, -3.8) {79};
+\node[vnode] (s5_3) at (6.8, -3.8) {10};
+\node[vnode] (s5_4) at (8.6, -3.8) {39};
+\node[vnode] (s5_5) at (10.4, -3.8) {26};
+\draw[thick, blue!70!black] (s5_1) -- (s5_2) -- (s5_3) -- (s5_4) -- (s5_5);
+\end{tikzpicture}
+\caption{Diễn biến danh sách qua từng thao tác \texttt{addHead} và \texttt{addTail}.}
+\end{figure}
+
+% ------------------------------------------------------------------------------
+\needspace{7.5cm}
+\subsection{Thêm Node tại vị trí đầu List (\texttt{addHead})}
+Hàm \texttt{addHead(List\& l, Node* p)} được cài đặt theo hai trường hợp: danh sách đang rỗng và danh sách đã có ít nhất một phần tử:
+\begin{lstlisting}
+void addHead(List& l, Node* p)
+{
+    if(l.pTail == NULL)
+    {
+        l.pHead = p;
+        l.pTail = p;
+    }
+    else
+    {
+        p->pNext = l.pHead;
+        l.pHead = p;
+    }
+}
+\end{lstlisting}
+\textit{(Ghi chú: Điều kiện \texttt{l.pTail == NULL} dùng để kiểm tra danh sách rỗng, tương đương với kiểm tra \texttt{l.pHead == NULL}.)}
+
+\subsubsection*{Minh họa từng bước với dãy giá trị \texttt{10, 79, 39}:}
+
+\noindent\textbf{Trường hợp 1: Danh sách đang rỗng (thêm giá trị \texttt{10})}
+\begin{enumerate}[itemsep=0.15em]
+    \item Ban đầu danh sách rỗng (\texttt{pHead => NULL}, \texttt{pTail => NULL}). Khởi tạo Node \texttt{p} tại địa chỉ \texttt{0xd56} bằng \texttt{initNode(10)} (\texttt{data = 10}, \texttt{pNext = NULL}).
+    \item Do \texttt{l.pTail == NULL}, thực hiện nhánh \texttt{if}:
+    \begin{center}
+        \texttt{l.pHead = p; \quad l.pTail = p;}
+    \end{center}
+    \item Kết quả: Cả \texttt{pHead} và \texttt{pTail} cùng trỏ tới \texttt{0xd56}.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    nbox/.style={rectangle, draw=blue!70!black, fill=white, minimum width=0.8cm, minimum height=0.48cm, font=\small, inner sep=2pt},
+    pbox/.style={rectangle, draw=orange!80!black, fill=white, minimum width=0.8cm, minimum height=0.48cm, font=\footnotesize, inner sep=2pt},
+    lbl/.style={font=\ttfamily\tiny, text=codeblue},
+    addr/.style={font=\ttfamily\footnotesize, text=addrcolor}
+]
+% Trạng thái trước
+\node[font=\bfseries\small\color{codeblue}] at (1.55, 2.85) {Trước khi thêm (\texttt{l.pTail == NULL})};
+\node[nbox] (d0) at (0, 0.25) {\dots};
+\node[pbox, fill=yellow!80, right=0.05cm of d0] (n0) {\dots};
+\node[lbl, anchor=south] at (d0.north) {data};
+\node[lbl, anchor=south] at (n0.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d0)(n0), yshift=0.14cm] (b0) {};
+\node[font=\ttfamily\footnotesize, text=codeblue, anchor=south] at (b0.north) {NULL};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.25cm of b0] (t0) {pHead => \color{codeblue}NULL};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.02cm of t0] {pTail => \color{codeblue}NULL};
+
+\node[nbox] (dp) at (2.8, 1.3) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of dp] (np) {NULL};
+\node[lbl, anchor=south] at (dp.north) {data};
+\node[lbl, anchor=south] at (np.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(dp)(np), yshift=0.14cm] (bp) {};
+\node[font=\ttfamily\footnotesize, text=codeblue, anchor=south] at (bp.north) {p => 0xd56};
+\draw[-{Stealth[length=2.2mm]}, dashed, thick, blue] (bp.west) to[out=185, in=75] (b0.north east);
+
+% Mũi tên chuyển trạng thái
+\draw[-{Stealth[length=2.5mm]}, very thick, codeblue] (5.3, 0.75) -- (6.5, 0.75);
+
+% Trạng thái sau
+\begin{scope}[xshift=9.2cm]
+\node[font=\bfseries\small\color{codeblue}] at (0.4, 2.85) {Sau khi thực hiện nhánh \texttt{if}};
+\node[nbox] (d1) at (0, 0.5) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of d1] (n1) {NULL};
+\node[lbl, anchor=south] at (d1.north) {data};
+\node[lbl, anchor=south] at (n1.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d1)(n1), yshift=0.14cm] (b1) {};
+\node[addr, anchor=south] at (b1.north) {0xd56};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.25cm of b1] (t1) {pHead => 0xd56};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.02cm of t1] {pTail => 0xd56};
+\end{scope}
+\end{tikzpicture}
+\caption{Minh họa \texttt{addHead} khi danh sách rỗng (thêm \texttt{10} tại \texttt{0xd56}).}
+\end{figure}
+
+\noindent\textbf{Trường hợp 2: Danh sách đã có phần tử (tiếp tục thêm giá trị \texttt{79})}
+\begin{enumerate}[itemsep=0.15em]
+    \item Danh sách hiện tại có Node \texttt{0xd56} (\texttt{data = 10}, \texttt{pNext = NULL}) với \texttt{pHead => 0xd56}, \texttt{pTail => 0xd56}.
+    \item Tạo Node mới \texttt{p = initNode(79);} tại địa chỉ \texttt{0xc95} (\texttt{data = 79}, \texttt{pNext = NULL}) rồi gọi \texttt{addHead(l, p);}.
+    \item Vì \texttt{l.pTail != NULL}, thực hiện nhánh \texttt{else}:
+    \begin{itemize}[itemsep=0.1em]
+        \item \texttt{p->pNext = l.pHead;}: Gán địa chỉ \texttt{pHead} hiện tại (\texttt{0xd56}) vào trường \texttt{pNext} của Node \texttt{p} (\texttt{0xc95}).
+        \item \texttt{l.pHead = p;}: Cập nhật \texttt{pHead} trỏ về Node mới \texttt{0xc95}.
+    \end{itemize}
+    \item Kết quả: \texttt{pHead => 0xc95}, \texttt{pTail => 0xd56}; Node \texttt{0xc95} nối tới Node \texttt{0xd56}.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    nbox/.style={rectangle, draw=blue!70!black, fill=white, minimum width=0.78cm, minimum height=0.48cm, font=\small, inner sep=2pt},
+    pbox/.style={rectangle, draw=orange!80!black, fill=white, minimum width=0.78cm, minimum height=0.48cm, font=\footnotesize, inner sep=2pt},
+    lbl/.style={font=\ttfamily\tiny, text=codeblue},
+    addr/.style={font=\ttfamily\footnotesize, text=addrcolor}
+]
+% Giai đoạn thực hiện p->pNext = l.pHead và l.pHead = p
+\node[font=\bfseries\small\color{codeblue}] at (1.8, 1.75) {Thực hiện nhánh \texttt{else}};
+\node[nbox] (d1) at (0, 0.35) {79};
+\node[pbox, fill=yellow!80, right=0.05cm of d1] (n1) {NULL};
+\node[lbl, anchor=south] at (d1.north) {data};
+\node[lbl, anchor=south] at (n1.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d1)(n1), yshift=0.14cm] (b1) {};
+\node[addr, anchor=south] at (b1.north) {0xc95};
+
+\node[nbox] (d2) at (3.2, 0.35) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of d2] (n2) {NULL};
+\node[lbl, anchor=south] at (d2.north) {data};
+\node[lbl, anchor=south] at (n2.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d2)(n2), yshift=0.14cm] (b2) {};
+\node[addr, anchor=south] at (b2.north) {0xd56};
+
+\draw[-{Stealth[length=2mm]}, dashed, thick, green!60!black] (n1.east) to[out=70, in=135, looseness=1.1] (b2.north west);
+
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of b1] (ph1) {pHead => ...?...};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of b2] (ph2) {pHead => 0xd56};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.02cm of ph2] {pTail => 0xd56};
+\draw[-{Stealth[length=2mm]}, dotted, thick, green!60!black] (ph2.west) -- (ph1.east);
+
+% Mũi tên chuyển trạng thái
+\draw[-{Stealth[length=2.5mm]}, very thick, codeblue] (5.5, 0.4) -- (6.5, 0.4);
+
+% Trạng thái kết quả
+\begin{scope}[xshift=7.8cm]
+\node[font=\bfseries\small\color{codeblue}] at (1.8, 1.75) {Trạng thái kết thúc};
+\node[nbox] (rd1) at (0, 0.35) {79};
+\node[pbox, fill=yellow!80, right=0.05cm of rd1] (rn1) {d56};
+\node[lbl, anchor=south] at (rd1.north) {data};
+\node[lbl, anchor=south] at (rn1.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(rd1)(rn1), yshift=0.14cm] (rb1) {};
+\node[addr, anchor=south] at (rb1.north) {0xc95};
+
+\node[nbox] (rd2) at (3.2, 0.35) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of rd2] (rn2) {NULL};
+\node[lbl, anchor=south] at (rd2.north) {data};
+\node[lbl, anchor=south] at (rn2.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(rd2)(rn2), yshift=0.14cm] (rb2) {};
+\node[addr, anchor=south] at (rb2.north) {0xd56};
+
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (rn1.east) to[out=70, in=135, looseness=1.1] (rb2.north west);
+
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of rb1] {pHead => 0xc95};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of rb2] {pTail => 0xd56};
+\end{scope}
+\end{tikzpicture}
+\caption{Minh họa \texttt{addHead} khi danh sách đã có phần tử (thêm \texttt{79} tại \texttt{0xc95}).}
+\end{figure}
+
+% ------------------------------------------------------------------------------
+\subsection{Thêm Node tại vị trí cuối List (\texttt{addTail})}
+Hàm \texttt{addTail(List\& l, Node* p)} được cài đặt tương ứng với hai trường hợp:
+\begin{lstlisting}
+void addTail(List& l, Node* p)
+{
+    if(l.pHead == NULL)
+    {
+        l.pHead = p;
+        l.pTail = p;
+    }
+    else
+    {
+        l.pTail->pNext = p;
+        l.pTail = p;
+    }
+}
+\end{lstlisting}
+
+\subsubsection*{Minh họa từng bước (tiếp tục thêm giá trị \texttt{39} vào cuối danh sách hiện có):}
+\begin{enumerate}[itemsep=0.15em]
+    \item Danh sách hiện tại có 2 Node: \texttt{0xc95 (79, d56)} $\rightarrow$ \texttt{0xd56 (10, NULL)}, với \texttt{pHead => 0xc95} và \texttt{pTail => 0xd56}.
+    \item Khởi tạo Node mới \texttt{p = initNode(39);} tại địa chỉ \texttt{0xa36} (\texttt{data = 39}, \texttt{pNext = NULL}) và gọi \texttt{addTail(l, p);}.
+    \item Vì \texttt{l.pHead != NULL}, thực hiện nhánh \texttt{else}:
+    \begin{itemize}[itemsep=0.1em]
+        \item \texttt{l.pTail->pNext = p;}: Cho trường \texttt{pNext} của Node cuối hiện tại (\texttt{0xd56}) lưu địa chỉ \texttt{a36} để liên kết tới Node mới \texttt{0xa36}.
+        \item \texttt{l.pTail = p;}: Cập nhật \texttt{pTail} chuyển từ \texttt{0xd56} sang \texttt{0xa36}.
+    \end{itemize}
+    \item Kết quả: \texttt{pHead => 0xc95}, \texttt{pTail => 0xa36}; danh sách hoàn chỉnh gồm 3 Node: \texttt{0xc95 (79)} $\rightarrow$ \texttt{0xd56 (10)} $\rightarrow$ \texttt{0xa36 (39)}.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    nbox/.style={rectangle, draw=blue!70!black, fill=white, minimum width=0.8cm, minimum height=0.46cm, font=\small, inner sep=2pt},
+    pbox/.style={rectangle, draw=orange!80!black, fill=white, minimum width=0.8cm, minimum height=0.46cm, font=\footnotesize, inner sep=2pt},
+    lbl/.style={font=\ttfamily\tiny, text=codeblue},
+    addr/.style={font=\ttfamily\footnotesize, text=addrcolor}
+]
+% Giai đoạn thực hiện else (khối trên)
+\node[font=\bfseries\small\color{codeblue}] at (3.4, 1.5) {Thực hiện \texttt{l.pTail->pNext = p; l.pTail = p;}};
+
+\node[nbox] (d1) at (0, 0) {79};
+\node[pbox, fill=yellow!80, right=0.05cm of d1] (n1) {d56};
+\node[lbl, anchor=south] at (d1.north) {data};
+\node[lbl, anchor=south] at (n1.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d1)(n1), yshift=0.13cm] (b1) {};
+\node[addr, anchor=south] at (b1.north) {0xc95};
+
+\node[nbox] (d2) at (3.0, 0) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of d2] (n2) {NULL};
+\node[lbl, anchor=south] at (d2.north) {data};
+\node[lbl, anchor=south] at (n2.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d2)(n2), yshift=0.13cm] (b2) {};
+\node[addr, anchor=south] at (b2.north) {0xd56};
+
+\node[nbox] (d3) at (6.0, 0) {39};
+\node[pbox, fill=yellow!80, right=0.05cm of d3] (n3) {NULL};
+\node[lbl, anchor=south] at (d3.north) {data};
+\node[lbl, anchor=south] at (n3.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(d3)(n3), yshift=0.13cm] (b3) {};
+\node[addr, anchor=south] at (b3.north) {0xa36};
+
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (n1.east) to[out=70, in=135, looseness=1.1] (b2.north west);
+\draw[-{Stealth[length=2mm]}, dotted, thick, green!60!black] (n2.east) to[out=70, in=135, looseness=1.1] (b3.north west);
+
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of b1] {pHead => 0xc95};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of b2] (pt1) {pTail => 0xd56};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of b3] (pt2) {pTail => ...?...};
+\draw[-{Stealth[length=2mm]}, dotted, thick, blue] (pt1.east) -- (pt2.west);
+
+% Trạng thái sau khi thêm (khối dưới)
+\begin{scope}[yshift=-3.3cm]
+\node[font=\bfseries\small\color{codeblue}] at (3.4, 1.5) {Trạng thái kết thúc};
+
+\node[nbox] (rd1) at (0, 0) {79};
+\node[pbox, fill=yellow!80, right=0.05cm of rd1] (rn1) {d56};
+\node[lbl, anchor=south] at (rd1.north) {data};
+\node[lbl, anchor=south] at (rn1.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(rd1)(rn1), yshift=0.13cm] (rb1) {};
+\node[addr, anchor=south] at (rb1.north) {0xc95};
+
+\node[nbox] (rd2) at (3.0, 0) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of rd2] (rn2) {a36};
+\node[lbl, anchor=south] at (rd2.north) {data};
+\node[lbl, anchor=south] at (rn2.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(rd2)(rn2), yshift=0.13cm] (rb2) {};
+\node[addr, anchor=south] at (rb2.north) {0xd56};
+
+\node[nbox] (rd3) at (6.0, 0) {39};
+\node[pbox, fill=yellow!80, right=0.05cm of rd3] (rn3) {NULL};
+\node[lbl, anchor=south] at (rd3.north) {data};
+\node[lbl, anchor=south] at (rn3.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(rd3)(rn3), yshift=0.13cm] (rb3) {};
+\node[addr, anchor=south] at (rb3.north) {0xa36};
+
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (rn1.east) to[out=70, in=135, looseness=1.1] (rb2.north west);
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (rn2.east) to[out=70, in=135, looseness=1.1] (rb3.north west);
+
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of rb1] {pHead => 0xc95};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of rb3] {pTail => 0xa36};
+\end{scope}
+\end{tikzpicture}
+\caption{Minh họa \texttt{addTail} thêm Node \texttt{39} tại \texttt{0xa36} vào cuối danh sách.}
+\end{figure}
+
+% ------------------------------------------------------------------------------
+\subsection{In danh sách (\texttt{printList} và \texttt{printWh})}
+Để duyệt và xuất toàn bộ giá trị của danh sách (ví dụ danh sách \texttt{0xc95 (79)} $\rightarrow$ \texttt{0xd56 (10)} $\rightarrow$ \texttt{0xa36 (39)}), ta sử dụng một con trỏ \texttt{p} xuất phát từ \texttt{l.pHead} và di chuyển lần lượt theo \texttt{p = p->pNext} cho đến khi gặp \texttt{NULL}.
+
+\begin{itemize}[itemsep=0.25em]
+    \item \textbf{Cách 1: Duyệt bằng vòng lặp \texttt{for}}
+\begin{lstlisting}
+void printList(List l)
+{
+    for(Node* p = l.pHead; p != NULL; p = p->pNext)
+    {
+        cout << p->data << "\t";
+    }
+}
+\end{lstlisting}
+
+    \item \textbf{Cách 2: Duyệt bằng vòng lặp \texttt{while}}
+\begin{lstlisting}
+void printWh(List l)
+{
+    Node* p = l.pHead;
+    while(p!=NULL)
+    {
+        cout << p->data << "\t";
+        p = p->pNext;
+    }
+}
+\end{lstlisting}
+\end{itemize}
+
+% ------------------------------------------------------------------------------
+\needspace{8cm}
+\subsection{Viết hàm \texttt{main} minh họa}
+\begin{lstlisting}
+int main()
+{
+    List l;
+    initList(l);
+
+    Node* p = initNode(10);
+
+    addHead(l, p);
+    addHead(l, initNode(79));
+    addTail(l, initNode(39));
+
+    cout << "In danh sach:\n";
+    printList(l); //79  10  39
+
+    cout << endl;
+    printWh(l);
+    return 0;
+}
+\end{lstlisting}
+
+\noindent\textbf{Kết quả xuất ra màn hình:}
+\begin{lstlisting}[numbers=none]
+In danh sach:
+79      10      39
+79      10      39
+\end{lstlisting}
+
+% ------------------------------------------------------------------------------
+\subsection{Tìm kiếm trên danh sách liên kết đơn}
+
+\subsubsection{Tìm kiếm một giá trị có trong List hay không}
+\begin{itemize}[itemsep=0.15em]
+    \item \textbf{Yêu cầu:} Viết hàm tìm kiếm một giá trị có trong List hay không?
+    \item \textbf{Phân tích:}
+    \begin{itemize}
+        \item \textit{Input:} List $\Rightarrow$ \texttt{List l}; Giá trị cần tìm $\Rightarrow$ \texttt{int value}.
+        \item \textit{Output:} True/false $\Rightarrow$ \texttt{return bool}.
+    \end{itemize}
+    \item \textbf{Mở rộng:} Trả về địa chỉ (\texttt{Node*}).
+\end{itemize}
+\textbf{Khung cài đặt trên bài giảng:}
+\begin{lstlisting}
+bool timGiaTri(List l, int value)
+{
+    for(Node* p = l.pHead; p != NULL; p = p->pNext)
+    {
+        if(...........)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+\end{lstlisting}
+\noindent\textit{Gợi ý hoàn thiện:} Thay \texttt{...........} bằng điều kiện \texttt{p->data == value}. Với phần mở rộng trả về địa chỉ, kiểu trả về của hàm là \texttt{Node*}; khi tìm thấy thì \texttt{return p;}, nếu duyệt hết danh sách không thấy thì \texttt{return NULL;}.
+
+\subsubsection{Tìm giá trị Node kế cuối}
+\begin{itemize}[itemsep=0.15em]
+    \item \textbf{Yêu cầu:} Viết hàm tìm giá trị node kế cuối?
+    \item \textbf{Phân tích:}
+    \begin{itemize}
+        \item \textit{Input:} List $\Rightarrow$ \texttt{List l}.
+        \item \textit{Output:} Có hay không $\Rightarrow$ \texttt{return bool}; Giá trị tìm thấy $\Rightarrow$ giá trị.
+    \end{itemize}
+    \item \textbf{Mở rộng:} Trả về địa chỉ.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    n/.style={ellipse, draw=orange!80!black, thick, fill=yellow!20, minimum width=0.85cm, minimum height=0.45cm},
+    ng/.style={ellipse, draw=orange!80!black, thick, fill=green!55!black, minimum width=0.85cm, minimum height=0.45cm},
+    lbl/.style={font=\bfseries\footnotesize, text=addrcolor}
+]
+% Trường hợp 1: Nhiều node (>= 3 node)
+\node[font=\bfseries\small, anchor=east] at (-0.9, 0) {Nhiều phần tử:};
+\node[n] (a1) at (0, 0) {};
+\node[n] (a2) at (1.15, 0) {};
+\node[n] (a3) at (2.3, 0) {};
+\node[ng] (a4) at (3.45, 0) {};
+\node[n] (a5) at (4.6, 0) {};
+\draw[thick, blue!70!black] (a1) -- (a2) -- (a3) -- (a4) -- (a5);
+\node[lbl, below=0.15cm of a1] {pHead};
+\node[lbl, below=0.15cm of a5] {pTail};
+\node[font=\footnotesize\itshape, right=0.25cm of a5, text width=6.2cm] {(Node tô xanh là node kế cuối: \texttt{p->pNext == l.pTail})};
+
+% Trường hợp 2: 2 node
+\node[font=\bfseries\small, anchor=east] at (-0.9, -1.25) {2 phần tử:};
+\node[ng] (b1) at (0, -1.25) {};
+\node[n] (b2) at (1.15, -1.25) {};
+\draw[thick, blue!70!black] (b1) -- (b2);
+\node[lbl, below=0.15cm of b1] {pHead};
+\node[lbl, below=0.15cm of b2] {pTail};
+\node[font=\footnotesize\itshape, right=0.25cm of b2] {(Node kế cuối chính là \texttt{pHead})};
+
+% Trường hợp 3: 1 node
+\node[font=\bfseries\small, anchor=east] at (-0.9, -2.5) {1 phần tử:};
+\node[n] (c1) at (0, -2.5) {};
+\node[lbl, below=0.1cm of c1] (cp1) {pHead};
+\node[lbl, below=0.01cm of cp1] {pTail};
+\node[font=\footnotesize\itshape, right=0.25cm of c1] {(Không có node kế cuối)};
+\end{tikzpicture}
+\caption{Các trường hợp cần xét khi tìm Node kế cuối trong danh sách.}
+\end{figure}
+
+% ------------------------------------------------------------------------------
+\subsection{Kỹ thuật đếm}
+\begin{itemize}[itemsep=0.15em]
+    \item \textbf{Yêu cầu:} Viết hàm đếm các giá trị chẵn có trong List?
+    \item \textbf{Phân tích:}
+    \begin{itemize}
+        \item \textit{Input:} List $\Rightarrow$ \texttt{List l}.
+        \item \textit{Output:} Số lượng phần tử chẵn $\Rightarrow$ \texttt{return int}.
+    \end{itemize}
+\end{itemize}
+\noindent\textit{Hướng thực hiện:} Khởi tạo biến đếm \texttt{int dem = 0;}, duyệt từ \texttt{l.pHead} đến \texttt{NULL}; với mỗi Node \texttt{p}, nếu \texttt{p->data \% 2 == 0} thì tăng \texttt{dem} lên \texttt{1}, cuối cùng \texttt{return dem;}.
+
+% ------------------------------------------------------------------------------
+\needspace{10.5cm}
+\subsection{Tìm giá trị lớn nhất -- nhỏ nhất}
+
+\subsubsection{Tìm giá trị lớn nhất}
+\begin{itemize}[itemsep=0.15em]
+    \item \textbf{Yêu cầu:} Viết hàm tìm giá trị lớn nhất trong List?
+    \item \textbf{Phân tích:}
+    \begin{itemize}
+        \item \textit{Input:} List $\Rightarrow$ \texttt{List l}.
+        \item \textit{Output:} Giá trị lớn nhất $\Rightarrow$ \texttt{return} giá trị.
+    \end{itemize}
+\end{itemize}
+\textbf{Khung cài đặt trên bài giảng:}
+\begin{lstlisting}
+int timGiaTriMax(List l)
+{
+    int m = (*@..giá trị đầu tiên...@*);
+    for(Node* p = l.pHead; p != NULL; p = p->pNext)
+    {
+        if(............)
+        {
+            ............
+        }
+    }
+
+    return m;
+}
+\end{lstlisting}
+\noindent\textit{Gợi ý hoàn thiện:} Khởi tạo \texttt{int m = l.pHead->data;} (khi danh sách không rỗng); trong vòng lặp kiểm tra \texttt{if (p->data > m)} thì cập nhật \texttt{m = p->data;}.
+
+\subsubsection{Tìm giá trị nhỏ nhất}
+\begin{itemize}[itemsep=0.15em]
+    \item \textbf{Yêu cầu:} Viết hàm tìm giá trị nhỏ nhất trong List?
+    \item \textbf{Phân tích:}
+    \begin{itemize}
+        \item \textit{Input:} List $\Rightarrow$ \texttt{List l}.
+        \item \textit{Output:} Giá trị nhỏ nhất $\Rightarrow$ \texttt{return} giá trị \textit{(ghi chú: slide gốc ghi nhầm chữ ``Giá trị lớn nhất'')}.
+    \end{itemize}
+    \item \textbf{Kết luận:} $\Rightarrow$ \textbf{Phương pháp tương tự tìm max} (giả sử \texttt{min} ban đầu là giá trị của \texttt{pHead}, sau đó duyệt qua từng Node đến \texttt{pTail} để so sánh và cập nhật).
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    n/.style={ellipse, draw=orange!80!black, thick, fill=yellow!20, minimum width=0.85cm, minimum height=0.45cm},
+    lbl/.style={font=\bfseries\footnotesize, text=addrcolor}
+]
+\node[n] (m1) at (0, 0) {};
+\node[n] (m2) at (1.6, 0) {};
+\node[n] (m3) at (3.2, 0) {};
+\node[n] (m4) at (4.8, 0) {};
+\node[n] (m5) at (6.4, 0) {};
+\draw[thick, blue!70!black] (m1) -- (m2) -- (m3) -- (m4) -- (m5);
+
+\node[lbl, below=0.15cm of m1] (ph) {pHead};
+\node[lbl, below=0.15cm of m5] {pTail};
+\node[font=\bfseries\footnotesize, text=codeblue, below=0.75cm of ph] (mn) {min};
+
+\draw[-{Stealth[length=2mm]}, thick, blue!70!black] (ph.south) -- (mn.north);
+\draw[-{Stealth[length=2mm]}, dashed, thick, green!60!black] (mn.east) -- (m2.south);
+\draw[-{Stealth[length=2mm]}, dashed, thick, green!60!black] (mn.east) -- (m3.south);
+\draw[-{Stealth[length=2mm]}, dashed, thick, green!60!black] (mn.east) -- (m4.south);
+\draw[-{Stealth[length=2mm]}, dashed, thick, green!60!black] (mn.east) -- (m5.south);
+\end{tikzpicture}
+\caption{Minh họa phương pháp tìm giá trị nhỏ nhất (khởi tạo từ \texttt{pHead} và duyệt đến \texttt{pTail}).}
+\end{figure}
+
+% ------------------------------------------------------------------------------
+\needspace{8.5cm}
+\subsection{Tính tổng các giá trị trong List}
+\begin{itemize}[itemsep=0.15em]
+    \item \textbf{Yêu cầu:} Viết hàm tính tổng các giá trị trong List?
+    \item \textbf{Phân tích:}
+    \begin{itemize}
+        \item \textit{Input:} List $\Rightarrow$ \texttt{List}.
+        \item \textit{Output:} Tổng các giá trị $\Rightarrow$ \texttt{return} giá trị.
+    \end{itemize}
+\end{itemize}
+\textbf{Khung cài đặt trên bài giảng:}
+\begin{lstlisting}
+int tinh(List l)
+{
+    int t = 0;
+    for(Node* p = l.pHead; p != NULL; p = p->pNext)
+    {
+        t = (*@\color{codegreen}\itshape //công thức tính tổng@*)
+    }
+
+    return t;
+}
+\end{lstlisting}
+\noindent\textit{Gợi ý hoàn thiện:} Công thức tính tổng là \texttt{t = t + p->data;}.
+
+% ------------------------------------------------------------------------------
+\needspace{7.5cm}
+\subsection{Xóa Node tại vị trí đầu List (\texttt{removeHead})}
+\begin{itemize}[itemsep=0.15em]
+    \item \textbf{Yêu cầu:} Viết hàm xóa Node đầu tiên trong List?
+    \item \textbf{Phân tích:}
+    \begin{itemize}
+        \item \textit{Input:} List $\Rightarrow$ \texttt{List}.
+        \item \textit{Output:}
+        \begin{itemize}
+            \item List đã xóa $\Rightarrow$ \texttt{List\&}
+            \item Kết quả xóa $\Rightarrow$ \texttt{bool}
+            \item Giá trị đã xóa $\Rightarrow$ \textit{(trả về qua hàm hoặc tham chiếu)}
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+\textbf{Khung hàm trên bài giảng:}
+\begin{lstlisting}
+int removeHead(List& l)
+{
+
+
+    return value;
+}
+\end{lstlisting}
+
+\subsubsection*{Minh họa từng bước thao tác xóa đầu:}
+Xét danh sách ban đầu có 3 Node: \texttt{0xc95 (79, d56)} $\rightarrow$ \texttt{0xd56 (10, a36)} $\rightarrow$ \texttt{0xa36 (39, NULL)}, với \texttt{pHead => 0xc95}, \texttt{pTail => 0xa36}.
+\begin{enumerate}[itemsep=0.2em]
+    \item \textbf{Bước \fbox{\color{stepblue}\#1}:} Dùng con trỏ tạm \texttt{p} trỏ tới Node đầu tiên đang cần xóa (\texttt{p => 0xc95}, tương ứng \texttt{Node* p = l.pHead;} và lưu lại \texttt{int value = p->data;}).
+    \item \textbf{Bước \fbox{\color{stepblue}\#2}:} Di chuyển \texttt{pHead} sang Node kế tiếp (\texttt{pHead} từ \texttt{0xc95} sang \texttt{0xd56}, tương ứng \texttt{l.pHead = l.pHead->pNext;}).
+    \item \textbf{Bước \fbox{\color{stepblue}\#3}:} Hủy (thu hồi vùng nhớ) Node mà \texttt{p} đang trỏ tới (\texttt{delete p;}).
+\end{enumerate}
+\textit{(Lưu ý: Nếu danh sách trước khi xóa chỉ có 1 Node thì sau bước \#2, \texttt{l.pHead == NULL}, cần gán thêm \texttt{l.pTail = NULL;} để tránh lạc con trỏ.)}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    nbox/.style={rectangle, draw=blue!70!black, fill=white, minimum width=0.8cm, minimum height=0.46cm, font=\small, inner sep=2pt},
+    pbox/.style={rectangle, draw=orange!80!black, fill=white, minimum width=0.8cm, minimum height=0.46cm, font=\footnotesize, inner sep=2pt},
+    lbl/.style={font=\ttfamily\tiny, text=codeblue},
+    addr/.style={font=\ttfamily\footnotesize, text=addrcolor},
+    stag/.style={rectangle, draw=stepblue, thick, text=stepblue, font=\bfseries\footnotesize, inner sep=2pt},
+    ptag/.style={rectangle, fill=green!45!yellow!75, text=addrcolor, font=\ttfamily\footnotesize\bfseries, inner sep=2.5pt}
+]
+% --- TRẠNG THÁI 1: Bước #1 và #2 (khối trên) ---
+\node[font=\bfseries\small\color{codeblue}] at (3.4, 2.25) {Bước \#1 và Bước \#2};
+\node[stag] (s1) at (-0.2, 1.55) {\#1};
+\node[ptag, right=0.2cm of s1] {p => 0xc95};
+
+\node[nbox] (a1) at (0, 0.25) {79};
+\node[pbox, fill=yellow!80, right=0.05cm of a1] (b1) {d56};
+\node[lbl, anchor=south] at (a1.north) {data};
+\node[lbl, anchor=south] at (b1.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(a1)(b1), yshift=0.13cm] (n1) {};
+\node[addr, anchor=south] at (n1.north) {0xc95};
+
+\node[nbox] (a2) at (3.0, 0.25) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of a2] (b2) {a36};
+\node[lbl, anchor=south] at (a2.north) {data};
+\node[lbl, anchor=south] at (b2.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(a2)(b2), yshift=0.13cm] (n2) {};
+\node[addr, anchor=south] at (n2.north) {0xd56};
+
+\node[nbox] (a3) at (6.0, 0.25) {39};
+\node[pbox, fill=yellow!80, right=0.05cm of a3] (b3) {NULL};
+\node[lbl, anchor=south] at (a3.north) {data};
+\node[lbl, anchor=south] at (b3.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(a3)(b3), yshift=0.13cm] (n3) {};
+\node[addr, anchor=south] at (n3.north) {0xa36};
+
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (b1.east) to[out=70, in=135, looseness=1.1] (n2.north west);
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (b2.east) to[out=70, in=135, looseness=1.1] (n3.north west);
+
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of n1] (ph1) {pHead => 0xc95};
+\node[font=\bfseries\footnotesize, text=addrcolor, fill=yellow!80, below=0.3cm of n2] (ph2) {pHead => 0xd56};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of n3] {pTail => 0xa36};
+\draw[-{Stealth[length=2mm]}, dotted, thick, blue] (ph1.east) -- (ph2.west);
+\node[stag, below=0.1cm of ph2] {\#2};
+
+% --- TRẠNG THÁI 2: Bước #3 và Kết quả (khối dưới) ---
+\begin{scope}[yshift=-4.1cm]
+\node[font=\bfseries\small\color{codeblue}] at (3.4, 2.25) {Bước \#3 (Hủy \texttt{p}) và Kết quả};
+\node[stag] (rs1) at (-0.2, 1.55) {\#1};
+\node[ptag, right=0.2cm of rs1] {p => 0xc95};
+
+\node[nbox] (ra1) at (0, 0.25) {79};
+\node[pbox, fill=yellow!80, right=0.05cm of ra1] (rb1) {d56};
+\node[lbl, anchor=south] at (ra1.north) {data};
+\node[lbl, anchor=south] at (rb1.north) {pNext};
+\node[ellipse, draw=red!80!black, dotted, thick, inner sep=3.5pt, fit=(ra1)(rb1), yshift=0.13cm] (rn1) {};
+\node[addr, anchor=south] at (rn1.north) {0xc95};
+
+\node[nbox] (ra2) at (3.0, 0.25) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of ra2] (rb2) {a36};
+\node[lbl, anchor=south] at (ra2.north) {data};
+\node[lbl, anchor=south] at (rb2.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(ra2)(rb2), yshift=0.13cm] (rn2) {};
+\node[addr, anchor=south] at (rn2.north) {0xd56};
+
+\node[nbox] (ra3) at (6.0, 0.25) {39};
+\node[pbox, fill=yellow!80, right=0.05cm of ra3] (rb3) {NULL};
+\node[lbl, anchor=south] at (ra3.north) {data};
+\node[lbl, anchor=south] at (rb3.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.5pt, fit=(ra3)(rb3), yshift=0.13cm] (rn3) {};
+\node[addr, anchor=south] at (rn3.north) {0xa36};
+
+\draw[-{Stealth[length=2mm]}, dotted, thick, green!60!black] (rb1.east) to[out=70, in=135, looseness=1.1] (rn2.north west);
+\node[stag] at (2.15, 1.15) {\#3};
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (rb2.east) to[out=70, in=135, looseness=1.1] (rn3.north west);
+
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of rn2] (rph2) {pHead => 0xd56};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of rn3] {pTail => 0xa36};
+\node[stag, below=0.1cm of rph2] {\#2};
+\end{scope}
+\end{tikzpicture}
+\caption{Minh họa từng bước xóa Node đầu danh sách (\texttt{removeHead}).}
+\end{figure}
+
+% ------------------------------------------------------------------------------
+\needspace{7cm}
+\subsection{Xóa Node tại vị trí cuối List (\texttt{removeTail})}
+\begin{itemize}[itemsep=0.15em]
+    \item \textbf{Yêu cầu:} Viết hàm xóa Node cuối trong List?
+    \item \textbf{Phân tích:}
+    \begin{itemize}
+        \item \textit{Input:} List $\Rightarrow$ \texttt{List}.
+        \item \textit{Output:}
+        \begin{itemize}
+            \item List đã xóa $\Rightarrow$ \texttt{List\&}
+            \item Giá trị đã xóa $\Rightarrow$ \texttt{return}
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
+\textbf{Khung hàm trên bài giảng:}
+\begin{lstlisting}
+int removeTail(List& l)
+{
+
+
+    return value;
+}
+\end{lstlisting}
+
+\subsubsection*{Minh họa từng bước thao tác xóa cuối:}
+Xét danh sách ban đầu có 4 Node: \texttt{0xc95 (79, d56)} $\rightarrow$ \texttt{0xd56 (10, a36)} $\rightarrow$ \texttt{0xa36 (39, f12)} $\rightarrow$ \texttt{0xf12 (26, NULL)}, với \texttt{pHead => 0xc95}, \texttt{pTail => 0xf12}.
+\begin{enumerate}[itemsep=0.2em]
+    \item \textbf{Bước \fbox{\color{stepblue}\#1}:} Tìm Node kế cuối (Node đứng ngay trước \texttt{pTail}) và giữ bằng con trỏ \texttt{q} (trong hình là \texttt{0xa36}, thỏa \texttt{q->pNext == l.pTail}).
+    \item \textbf{Bước \fbox{\color{stepblue}\#2}:} Dùng con trỏ \texttt{p} trỏ tới Node cuối cùng cần xóa (\texttt{p => 0xf12}, tương ứng \texttt{Node* p = l.pTail;} và lưu \texttt{int value = p->data;}).
+    \item \textbf{Bước \fbox{\color{stepblue}\#3}:} Cập nhật \texttt{pTail} trỏ về Node kế cuối \texttt{q} (\texttt{pTail} từ \texttt{0xf12} chuyển sang \texttt{0xa36}, tương ứng \texttt{l.pTail = q;}).
+    \item \textbf{Bước \fbox{\color{stepblue}\#4}:} Ngắt liên kết tới Node cuối cũ (\texttt{l.pTail->pNext = NULL;}) và thu hồi vùng nhớ của Node \texttt{p} (\texttt{delete p;}).
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    nbox/.style={rectangle, draw=blue!70!black, fill=white, minimum width=0.72cm, minimum height=0.44cm, font=\small, inner sep=2pt},
+    pbox/.style={rectangle, draw=orange!80!black, fill=white, minimum width=0.72cm, minimum height=0.44cm, font=\footnotesize, inner sep=2pt},
+    lbl/.style={font=\ttfamily\tiny, text=codeblue},
+    addr/.style={font=\ttfamily\footnotesize, text=addrcolor},
+    stag/.style={rectangle, draw=stepblue, thick, text=stepblue, font=\bfseries\footnotesize, inner sep=2pt},
+    ptag/.style={rectangle, fill=green!45!yellow!75, text=addrcolor, font=\ttfamily\footnotesize\bfseries, inner sep=2.5pt}
+]
+% Khối trên: Các bước #1, #2, #3, #4
+\node[font=\bfseries\small\color{codeblue}] at (4.9, 2.65) {Diễn biến các bước \#1, \#2, \#3, \#4};
+
+\node[stag] (st1) at (6.4, 2.05) {\#1};
+\node[ptag, below=0.12cm of st1] {q => 0xa36};
+
+\node[stag] (st2) at (9.4, 2.05) {\#2};
+\node[ptag, below=0.12cm of st2] {p => 0xf12};
+
+\node[nbox] (d1) at (0, 0) {79};
+\node[pbox, fill=yellow!80, right=0.05cm of d1] (n1) {d56};
+\node[lbl, anchor=south] at (d1.north) {data};
+\node[lbl, anchor=south] at (n1.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.2pt, fit=(d1)(n1), yshift=0.13cm] (b1) {};
+\node[addr, anchor=south] at (b1.north) {0xc95};
+
+\node[nbox] (d2) at (2.95, 0) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of d2] (n2) {a36};
+\node[lbl, anchor=south] at (d2.north) {data};
+\node[lbl, anchor=south] at (n2.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.2pt, fit=(d2)(n2), yshift=0.13cm] (b2) {};
+\node[addr, anchor=south] at (b2.north) {0xd56};
+
+\node[nbox] (d3) at (5.9, 0) {39};
+\node[pbox, fill=yellow!80, right=0.05cm of d3] (n3) {f12};
+\node[lbl, anchor=south] at (d3.north) {data};
+\node[lbl, anchor=south] at (n3.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.2pt, fit=(d3)(n3), yshift=0.13cm] (b3) {};
+\node[addr, anchor=south] at (b3.north) {0xa36};
+
+\node[nbox] (d4) at (8.85, 0) {26};
+\node[pbox, fill=yellow!80, right=0.05cm of d4] (n4) {NULL};
+\node[lbl, anchor=south] at (d4.north) {data};
+\node[lbl, anchor=south] at (n4.north) {pNext};
+\node[ellipse, draw=red!80!black, dotted, thick, inner sep=3.2pt, fit=(d4)(n4), yshift=0.13cm] (b4) {};
+\node[addr, anchor=south] at (b4.north) {0xf12};
+
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (n1.east) to[out=70, in=135, looseness=1.1] (b2.north west);
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (n2.east) to[out=70, in=135, looseness=1.1] (b3.north west);
+\draw[-{Stealth[length=2mm]}, dotted, thick, green!60!black] (n3.east) to[out=70, in=135, looseness=1.1] (b4.north west);
+\node[stag] at (7.95, 1.0) {\#4};
+
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of b1] {pHead => 0xc95};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of b3] (pt1) {pTail => 0xa36};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of b4] (pt2) {pTail => 0xf12};
+\draw[-{Stealth[length=2mm]}, dotted, thick, blue] (pt2.west) -- (pt1.east);
+\node[stag, below=0.12cm of pt1] {\#3};
+
+% Khối dưới: Trạng thái kết thúc
+\begin{scope}[yshift=-4.05cm, xshift=1.45cm]
+\node[font=\bfseries\small\color{codeblue}] at (3.4, 1.35) {Trạng thái sau khi xóa xong};
+
+\node[nbox] (fd1) at (0, 0) {79};
+\node[pbox, fill=yellow!80, right=0.05cm of fd1] (fn1) {d56};
+\node[lbl, anchor=south] at (fd1.north) {data};
+\node[lbl, anchor=south] at (fn1.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.2pt, fit=(fd1)(fn1), yshift=0.13cm] (fb1) {};
+\node[addr, anchor=south] at (fb1.north) {0xc95};
+
+\node[nbox] (fd2) at (2.95, 0) {10};
+\node[pbox, fill=yellow!80, right=0.05cm of fd2] (fn2) {a36};
+\node[lbl, anchor=south] at (fd2.north) {data};
+\node[lbl, anchor=south] at (fn2.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.2pt, fit=(fd2)(fn2), yshift=0.13cm] (fb2) {};
+\node[addr, anchor=south] at (fb2.north) {0xd56};
+
+\node[nbox] (fd3) at (5.9, 0) {39};
+\node[pbox, fill=yellow!80, right=0.05cm of fd3] (fn3) {NULL};
+\node[lbl, anchor=south] at (fd3.north) {data};
+\node[lbl, anchor=south] at (fn3.north) {pNext};
+\node[ellipse, draw=red!80!black, thick, inner sep=3.2pt, fit=(fd3)(fn3), yshift=0.13cm] (fb3) {};
+\node[addr, anchor=south] at (fb3.north) {0xa36};
+
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (fn1.east) to[out=70, in=135, looseness=1.1] (fb2.north west);
+\draw[-{Stealth[length=2mm]}, thick, green!60!black] (fn2.east) to[out=70, in=135, looseness=1.1] (fb3.north west);
+
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of fb1] {pHead => 0xc95};
+\node[font=\bfseries\footnotesize, text=addrcolor, below=0.3cm of fb3] {pTail => 0xa36};
+\end{scope}
+\end{tikzpicture}
+\caption{Minh họa từng bước xóa Node cuối danh sách (\texttt{removeTail}).}
+\end{figure}
+
+% ==============================================================================
+\section{Hệ Thống Bài Tập Ứng Dụng}
+% ==============================================================================
+
+\subsection{Bài Tập 1: Danh sách liên kết đơn quản lý các số nguyên}
+\textbf{Đề bài:} Viết chương trình cài đặt danh sách liên kết đơn quản lý các số nguyên. Thực hiện theo yêu cầu sau:
+\begin{enumerate}[itemsep=0.15em]
+    \item Xây dựng cấu trúc node và cấu trúc danh sách liên kết đơn.
+    \item Viết hàm khởi tạo danh sách liên kết đơn và hàm khởi tạo địa chỉ node từ một số nguyên.
+    \item Viết hàm chèn node vào đầu danh sách.
+    \item Viết hàm chèn node vào cuối danh sách.
+    \item Viết hàm khởi tạo giá trị cho danh sách từ mảng một chiều.
+    \item Viết hàm in giá trị danh sách đã nhập.
+    \item Viết hàm in giá trị kèm địa chỉ của từng node trong danh sách.
+    \item Viết hàm kiểm tra danh sách có rỗng hay không.
+    \item Viết hàm trả về node thứ $n$ trong danh sách.
+    \item Viết hàm tìm kiếm một node có giá trị $X$ trong danh sách.
+    \item Viết hàm tìm kiếm \underline{các địa chỉ node} có giá trị $X$ trong danh sách.
+    \item Viết hàm đếm số lượng các node có giá trị âm, dương.
+    \item Viết hàm tìm node có giá trị âm lớn nhất, tìm node có giá trị lẻ nhỏ nhất trong danh sách.
+    \item Viết hàm cập nhật giá trị cho một node có giá trị là $X$ bằng giá trị $Y$ mới.
+    \item Viết hàm copy danh sách.
+\end{enumerate}
+
+\subsection{Bài Tập 2: Danh sách liên kết đơn quản lý sinh viên}
+\textbf{Đề bài:} Viết chương trình cài đặt danh sách liên kết đơn quản lý sinh viên với các thao tác như sau:
+\begin{enumerate}[itemsep=0.15em]
+    \item Xây dựng cấu trúc dữ liệu có tên \textbf{\color{addrcolor}\texttt{SinhVien}} lưu trữ các thông tin sau: \texttt{maSV}, \texttt{hoTen}, \texttt{diemTB}, \texttt{xepLoai}\dots{} (hoặc lưu trữ thêm các thông tin khác nếu muốn).
+    \item Xây dựng cấu trúc node để lưu trữ sinh viên và cấu trúc danh sách liên kết đơn quản lý sinh viên.
+    \item Viết hàm khởi tạo danh sách liên kết đơn và hàm khởi tạo địa chỉ node từ kiểu \texttt{SinhVien}.
+    \item Viết hàm thêm sinh viên vào đầu danh sách.
+    \item Viết hàm thêm sinh viên vào cuối danh sách.
+    \item Viết hàm khởi tạo dữ liệu cho danh sách sinh viên \textit{(Dữ liệu kiểm thử xem cuối bài)}.
+    \item Viết hàm in danh sách sinh viên.
+    \item Viết hàm cập nhật xếp loại học lực.
+    \item Viết hàm tìm điểm trung bình cao nhất.
+    \item Viết hàm tìm kiếm sinh viên theo mã sinh viên.
+    \item Viết hàm tìm SV có trung bình cao nhất.
+    \item Viết hàm tìm SV có điểm trung bình thấp nhất.
+\end{enumerate}
+
+\needspace{5.5cm}
+\noindent\textbf{Dữ liệu Sinh Viên dùng để kiểm thử:}
+\begin{lstlisting}[numbers=none]
+{123, "Nguyen Van A", 9.1, ""};
+{124, "Nguyen Van B", 8.8, ""};
+{125, "Nguyen Van C", 9.1, ""};
+{126, "Nguyen Van D", 2.1, ""};
+{127, "Nguyen Van F", 9.7, ""};
+{128, "Nguyen Van G", 4.1, ""};
+{129, "Nguyen Van H", 8.3, ""};
+{130, "Nguyen Van K", 7.9, ""};
+\end{lstlisting}
+
+\end{document}

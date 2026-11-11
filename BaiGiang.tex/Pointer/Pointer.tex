@@ -1,0 +1,911 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{mathptmx} % Font Times New Roman
+\usepackage[a4paper,top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,shapes.multipart,arrows.meta,positioning,calc}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{setspace}
+\setstretch{1.14}
+
+% Định nghĩa màu sắc
+\definecolor{codegreen}{rgb}{0,0.5,0}
+\definecolor{codegray}{rgb}{0.4,0.4,0.4}
+\definecolor{codepurple}{rgb}{0.55,0,0.85}
+\definecolor{codeblue}{rgb}{0.0,0.22,0.65}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.98}
+\definecolor{addrcolor}{rgb}{0.75,0.0,0.0}
+
+% Thiết lập listings cho C++
+\lstset{
+    language=C++,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{codeblue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\fontfamily{pcr}\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=6pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4,
+    frame=single,
+    rulecolor=\color{codegray!35},
+    aboveskip=0.5em,
+    belowskip=0.5em,
+    escapeinside={(*@}{@*)}
+}
+
+% Định dạng tiêu đề các mục
+\usepackage{titlesec}
+\titleformat{\section}{\Large\bfseries\color{codeblue}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries}{\thesubsubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\titlespacing*{\subsection}{0pt}{1.0em}{0.4em}
+\titlespacing*{\subsubsection}{0pt}{0.8em}{0.3em}
+
+\begin{document}
+
+\begin{center}
+    {\large \textbf{BÀI GIẢNG HỌC PHẦN: CẤU TRÚC DỮ LIỆU VÀ GIẢI THUẬT}}\\[0.25em]
+    {\LARGE \textbf{\color{codeblue}CHUYÊN ĐỀ: CON TRỎ -- CẤP PHÁT ĐỘNG -- ỨNG DỤNG}}\\[0.35em]
+    \rule{\textwidth}{1pt}
+\end{center}
+
+\vspace{-0.6em}
+
+\section*{TỔNG QUAN NỘI DUNG BÀI HỌC}
+\begin{enumerate}[leftmargin=2.5em, itemsep=0.05em]
+    \item Biến và vùng nhớ RAM
+    \item Toán tử \texttt{\&} và \texttt{*}
+    \item Khái niệm con trỏ (Pointer)
+    \item Cú pháp khai báo con trỏ
+    \item Khởi tạo con trỏ và con trỏ NULL
+    \item Kích thước con trỏ và cấp phát bộ nhớ
+    \item Con trỏ và hàm
+    \item Con trỏ và chuỗi ký tự
+    \item Con trỏ trong mảng một chiều
+    \item Con trỏ và kiểu cấu trúc (Struct)
+    \item Hệ thống bài tập ứng dụng
+\end{enumerate}
+
+\vspace{0.4em}
+\hrule
+\vspace{0.8em}
+
+\section{Biến và Vùng Nhớ RAM}
+
+\subsection{Vấn đề dẫn nhập: Quản lý biến trong bộ nhớ}
+Xét chương trình C++ sau:
+\begin{lstlisting}
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    char c = 'F';
+    int x = 10;
+    float y = 1.8;
+
+    return 0;
+}
+\end{lstlisting}
+\textbf{Đặt vấn đề:} Trong quá trình chương trình vận hành, các biến \texttt{c}, \texttt{x}, \texttt{y} được hệ điều hành và phần cứng quản lý, lưu trữ trong bộ nhớ như thế nào?
+
+\subsection{Đặc tính của vùng nhớ RAM (Random Access Memory)}
+RAM là bộ nhớ truy xuất ngẫu nhiên chính của máy tính, có các đặc điểm cốt lõi sau:
+\begin{itemize}[itemsep=0.15em]
+    \item \textbf{Mục đích sử dụng:} Được dùng để lưu trữ dữ liệu và chương trình đang hoạt động trong thời gian thực.
+    \item \textbf{Cấu trúc ô nhớ (cell):} Trong RAM có rất nhiều ô nhớ (\textit{memory cell}), mỗi cell thông thường có kích thước \textbf{1 byte} (8 bit).
+    \item \textbf{Địa chỉ ô nhớ:} Mỗi cell trong RAM sở hữu một \textbf{địa chỉ duy nhất} để định vị và truy cập (thường biểu diễn ở hệ cơ số 16 -- Hexadecimal, ví dụ: \texttt{0xf919a0}, \texttt{0xf919a1}, \dots).
+    \item \textbf{Truy xuất ngẫu nhiên và nhanh chóng:} Cho phép CPU truy cập bất kỳ vị trí ô nhớ nào trong RAM một cách ngẫu nhiên và rất nhanh chóng, với thời gian truy xuất đồng đều.
+    \item \textbf{Tính chất tạm thời (Volatile):} RAM là vùng nhớ khả biến; dữ liệu chỉ tồn tại trong khi máy tính đang hoạt động và bị xóa sạch khi máy tính tắt nguồn.
+\end{itemize}
+
+\subsection{Cơ chế phân bổ ô nhớ của biến trên RAM}
+Mỗi biến khi khai báo sẽ chiếm giữ một số lượng cell nhớ tương ứng với kích thước kiểu dữ liệu của nó:
+\begin{itemize}[itemsep=0.15em]
+    \item Biến \texttt{char c = 'F'}: Kiểu \texttt{char} chiếm \textbf{1 byte} (1 cell tại địa chỉ \texttt{0xf919a1}).
+    \item Biến \texttt{int x = 10}: Kiểu \texttt{int} chiếm \textbf{4 byte} (4 cells: \texttt{0xf919a2}, \texttt{0xf919a3}, \texttt{0xf919a4}, \texttt{0xf919a5}). Địa chỉ đại diện cho biến \texttt{x} là địa chỉ bắt đầu: \texttt{0xf919a2}.
+    \item Biến \texttt{float y = 1.8}: Kiểu \texttt{float} chiếm \textbf{4 byte} (4 cells: \texttt{0xf919a6}, \texttt{0xf919a7}, \texttt{0xf919a8}, \texttt{0xf919a9}). Địa chỉ đại diện cho biến \texttt{y} là địa chỉ bắt đầu: \texttt{0xf919a6}.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    cell/.style={rectangle, draw=black, minimum width=2.4cm, minimum height=0.5cm, align=center, fill=yellow!15, font=\small},
+    node distance=0cm,
+    addr/.style={font=\ttfamily\footnotesize, text=addrcolor},
+    varlbl/.style={font=\bfseries\large}
+]
+% Bảng ô nhớ chi tiết
+\node[font=\bfseries] at (-1.4, 3.6) {Địa chỉ};
+\node[font=\bfseries] at (1.2, 3.6) {Ô nhớ (cell -- 1 byte)};
+
+\node[cell] (c0) at (1.2, 3.0) {};
+\node[cell, below=of c0] (c1) {'F'};
+\node[cell, below=of c1] (c2) {10};
+\node[cell, below=of c2] (c3) {};
+\node[cell, below=of c3] (c4) {};
+\node[cell, below=of c4] (c5) {};
+\node[cell, below=of c5] (c6) {1.8};
+\node[cell, below=of c6] (c7) {};
+\node[cell, below=of c7] (c8) {};
+\node[cell, below=of c8] (c9) {};
+\node[cell, below=of c9] (c10) {};
+
+\node[addr, left=0.4cm of c0] {0xf919a0};
+\node[addr, left=0.4cm of c1] {0xf919a1};
+\node[addr, left=0.4cm of c2] {0xf919a2};
+\node[addr, left=0.4cm of c3] {0xf919a3};
+\node[addr, left=0.4cm of c4] {0xf919a4};
+\node[addr, left=0.4cm of c5] {0xf919a5};
+\node[addr, left=0.4cm of c6] {0xf919a6};
+\node[addr, left=0.4cm of c7] {0xf919a7};
+\node[addr, left=0.4cm of c8] {0xf919a8};
+\node[addr, left=0.4cm of c9] {0xf919a9};
+\node[addr, left=0.4cm of c10] {0xf919aa};
+
+\node[varlbl, right=0.5cm of c1] {c};
+\node[varlbl, right=0.5cm of c3] {x};
+\node[varlbl, right=0.5cm of c7] {y};
+
+% Mô hình vẽ gọn hơn
+\begin{scope}[xshift=7.5cm]
+    \node[font=\bfseries\color{codeblue}] at (0, 3.6) {Cách vẽ mô hình rút gọn};
+
+    \node[rectangle, draw=black, minimum width=2.4cm, minimum height=0.65cm, fill=yellow!15, label={[addr, yshift=2pt]above:0xf919a1}] (boxC) at (0, 2.2) {'F'};
+    \node[font=\bfseries, left=0.4cm of boxC] {c};
+
+    \node[rectangle, draw=black, minimum width=2.4cm, minimum height=0.65cm, fill=yellow!15, label={[addr, yshift=2pt]above:0xf919a2}] (boxX) at (0, 0.7) {10};
+    \node[font=\bfseries, left=0.4cm of boxX] {x};
+
+    \node[rectangle, draw=black, minimum width=2.4cm, minimum height=0.65cm, fill=yellow!15, label={[addr, yshift=2pt]above:0xf919a6}] (boxY) at (0, -0.8) {1.8};
+    \node[font=\bfseries, left=0.4cm of boxY] {y};
+\end{scope}
+\end{tikzpicture}
+\caption{Cơ chế tổ chức dữ liệu các biến trên vùng nhớ RAM.}
+\end{figure}
+
+\section{Các Toán Tử \& và *}
+
+\subsection{Định nghĩa hai toán tử cơ bản}
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Toán tử lấy địa chỉ (\texttt{\&})}:
+    \begin{itemize}
+        \item \textit{Chức năng:} Dùng để lấy địa chỉ ô nhớ trong bộ nhớ của biến.
+        \item \textit{Phương pháp dùng:} \texttt{\&tên\_biến}
+        \item \textit{Ví dụ:} Nếu biến \texttt{x} có giá trị \texttt{36} và nằm tại địa chỉ \texttt{0xb369}, thì \texttt{\&x} trả về \texttt{0xb369}.
+    \end{itemize}
+    \item \textbf{Toán tử giải tham chiếu / truy xuất giá trị (\texttt{*})}:
+    \begin{itemize}
+        \item \textit{Chức năng:} Dùng để truy cập vào giá trị mà một con trỏ đang trỏ đến (hoặc giá trị mà một địa chỉ ô nhớ đang quản lý).
+        \item \textit{Phương pháp dùng:} \texttt{*địa\_chỉ\_biến} hoặc \texttt{*tên\_con\_trỏ}
+        \item \textit{Ví dụ:} Biểu thức \texttt{*(\&x)} sẽ truy cập vào ô nhớ tại địa chỉ \texttt{\&x} để lấy lại giá trị gốc \texttt{36}.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Chương trình minh họa toán tử \texttt{\&} và \texttt{*}}
+\begin{lstlisting}
+#include <iostream>
+#include <cstdio>
+using namespace std;
+
+int main()
+{
+    int x = 36; // Gia su x duoc cap phat tai o nho co dia chi 0xb369
+
+    // In gia tri va dia chi bang cout
+    cout << "Gia tri bien x = " << x << endl;        // In: 36
+    cout << "Dia chi bien x : " << &x << endl;       // In: dia chi hexa (vi du: 0xb369)
+
+    // In dia chi bang printf
+    printf("Dia chi bien x : %p\n", (void*)&x);      // Dinh dang con tro chuan (%p)
+    printf("Dia chi bien x : %x\n", &x);             // Dinh dang so nguyen he 16 (%x)
+
+    // Truy xuat gia tri thong qua toan tu giai tham chieu *(&x)
+    cout << "Gia tri bien x = " << *(&x) << endl;    // In: 36
+
+    return 0;
+}
+\end{lstlisting}
+
+\section{Khái Niệm Con Trỏ (Pointer)}
+\begin{itemize}[itemsep=0.25em]
+    \item \textbf{Định nghĩa:} Con trỏ (\textit{pointer}) là một \textbf{kiểu dữ liệu đặc biệt} dùng để \textbf{lưu địa chỉ} của một ô nhớ khác trong bộ nhớ.
+    \item \textbf{Tính năng:} Con trỏ cho phép chương trình truy cập và thay đổi dữ liệu của biến được quản lý bởi một địa chỉ cụ thể.
+    \item \textbf{Lưu ý sử dụng:} Thao tác với con trỏ can thiệp trực tiếp vào bộ nhớ, do đó cần cẩn thận và chắc chắn sử dụng chính xác để tránh các vấn đề liên quan đến quản lý bộ nhớ (\textit{memory leak, dangling pointer, crash}).
+\end{itemize}
+
+\section{Cú Pháp Khai Báo Con Trỏ}
+
+\subsection{Cú pháp chung}
+\begin{center}
+    \fbox{\textbf{\texttt{Kiểu\_Dữ\_Liệu*  tên\_con\_trỏ;}}}
+\end{center}
+\textbf{Trong đó:}
+\begin{itemize}[itemsep=0.15em]
+    \item \texttt{Kiểu\_Dữ\_Liệu}: Là kiểu dữ liệu của biến mà con trỏ sẽ trỏ tới (ví dụ: \texttt{int}, \texttt{float}, \texttt{char}, \texttt{double}, \texttt{SinhVien}, \dots).
+    \item \texttt{*}: Toán tử con trỏ, đặt sau kiểu dữ liệu để khai báo là một con trỏ.
+    \item \texttt{tên\_con\_trỏ}: Tên của biến con trỏ.
+\end{itemize}
+
+\subsection{Các ví dụ khai báo}
+\begin{lstlisting}
+int* iP;             // Con tro iP tro toi mot bien kieu int
+float* fP;           // Con tro fP tro toi mot bien kieu float
+
+// Khai bao nhieu con tro tren mot dong: phai co dau * truoc tung ten bien
+int *p1, *p2, *p3;
+
+// Con tro tro toi kieu du lieu cau truc (struct)
+SinhVien* pSV;       // Con tro tro toi cau truc SinhVien
+ToaDo* pTD;          // Con tro tro toi cau truc ToaDo
+\end{lstlisting}
+
+\section{Khởi Tạo Con Trỏ và Con Trỏ NULL}
+
+\subsection{Các trạng thái khởi tạo của con trỏ}
+\begin{enumerate}[itemsep=0.25em]
+    \item \textbf{Con trỏ chưa khởi tạo:} Khi khai báo kiểu con trỏ và không gán giá trị địa chỉ nào hết thì con trỏ đó \textbf{chưa khởi tạo} (chứa giá trị rác ngẫu nhiên, ví dụ: \texttt{0xb577}). Truy xuất vùng nhớ này rất nguy hiểm:
+    \begin{lstlisting}
+int* p1; // Con tro chua khoi tao (chua dia chi rac)
+    \end{lstlisting}
+    
+    \item \textbf{Con trỏ NULL:} Nếu gán giá trị \texttt{NULL} cho con trỏ thì gọi là \textbf{con trỏ NULL}, nó sẽ không trỏ vào địa chỉ của biến nào cả:
+    \begin{lstlisting}
+int* p2 = NULL; // Con tro NULL (an toan khi kiem tra dieu kien)
+    \end{lstlisting}
+
+    \item \textbf{Con trỏ trỏ đến địa chỉ của biến đã có:}
+    \begin{lstlisting}
+int n = 36;       // Bien n tai dia chi 0xf123, gia tri 36
+int* p3 = &n;     // Con tro p3 tai dia chi 0xb369, chua gia tri la 0xf123
+    \end{lstlisting}
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    box/.style={rectangle, draw=black, minimum width=2.4cm, minimum height=0.65cm, align=center, fill=yellow!15, font=\small},
+    addr/.style={font=\ttfamily\footnotesize, text=addrcolor},
+    lbl/.style={font=\bfseries}
+]
+% p1
+\node[lbl] (l1) at (0, 2.4) {p1};
+\node[box, right=0.4cm of l1, label={[addr, yshift=2pt]above:0xb577}] (bp1) {\dots};
+\node[right=0.4cm of bp1, font=\footnotesize\itshape] {(con trỏ chưa khởi tạo)};
+
+% p2
+\node[lbl] (l2) at (0, 1.2) {p2};
+\node[box, right=0.4cm of l2, label={[addr, yshift=2pt]above:0xb456}] (bp2) {\textbf{NULL}};
+\node[right=0.4cm of bp2, font=\footnotesize\itshape] {(con trỏ NULL)};
+
+% p3 và n
+\node[lbl] (l3) at (0, 0) {p3};
+\node[box, right=0.4cm of l3, label={[addr, yshift=2pt]above:0xb369}] (bp3) {\texttt{0xf123}};
+
+\node[box, right=3.2cm of bp3, label={[addr, yshift=2pt]above:0xf123}] (bn) {36};
+\node[lbl, right=0.3cm of bn] {n};
+
+\draw[-{Stealth[length=2.5mm]}, thick, addrcolor] (bp3.east) -- (bn.west);
+\end{tikzpicture}
+\caption{Biểu diễn trạng thái của các con trỏ trong bộ nhớ.}
+\end{figure}
+
+\section{Kích Thước Con Trỏ và Cấp Phát Bộ Nhớ}
+
+\subsection{Xác định kích thước bằng toán tử \texttt{sizeof}}
+Để xác định kích thước của \textbf{kiểu dữ liệu} hoặc \textbf{biến} thì dùng \texttt{size} hoặc \texttt{sizeof()}. Đơn vị: \textbf{byte}.
+\begin{itemize}[itemsep=0.15em]
+    \item \textit{Cú pháp:} \texttt{sizeof(kiểu\_dữ\_liệu)} hoặc \texttt{sizeof(tên\_biến)} (hoặc \texttt{sizeof tên\_biến}).
+\end{itemize}
+\begin{lstlisting}
+double x = 9.6;
+double* p;
+
+cout << sizeof(int) << endl;     // In: 4 (byte)
+cout << sizeof(double) << endl;  // In: 8 (byte)
+cout << sizeof x << endl;        // In: 8 (byte)
+cout << sizeof p << endl;        // In: 4 (he 32-bit) hoac 8 (he 64-bit)
+\end{lstlisting}
+
+\noindent\textbf{Quy tắc quan trọng về kích thước con trỏ:}
+\begin{itemize}[itemsep=0.15em]
+    \item Kích thước của một con trỏ trong C++ có thể khác nhau trên các nền tảng và trình biên dịch khác nhau:
+    \begin{itemize}
+        \item Hệ thống \textbf{32-bit}: Con trỏ có kích thước \textbf{4 byte}.
+        \item Hệ thống \textbf{64-bit}: Con trỏ có kích thước \textbf{8 byte}.
+    \end{itemize}
+    \item Kích thước này chỉ phụ thuộc vào kiến trúc hệ thống, không phụ thuộc vào kiểu dữ liệu được trỏ tới.
+\end{itemize}
+
+\subsection{Phân biệt Cấp phát tĩnh và Cấp phát động}
+\begin{itemize}[itemsep=0.2em]
+    \item \textbf{Cấp phát bộ nhớ tĩnh (Static Memory Allocation):}
+    \begin{itemize}
+        \item Được thực hiện bằng cách khai báo \textbf{mảng} hoặc \textbf{biến} với kích thước cụ thể \textbf{tại thời điểm biên dịch}.
+        \item Các biến và mảng này tồn tại trong suốt thời gian chạy chương trình và \textbf{không thay đổi kích thước} khi chạy.
+    \end{itemize}
+    \item \textbf{Cấp phát động (Dynamic Memory Allocation):}
+    \begin{itemize}
+        \item Cho phép cấp phát bộ nhớ trong quá trình chạy chương trình (\textit{runtime}) và giải phóng bộ nhớ khi không cần sử dụng nữa.
+    \end{itemize}
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{p{3.8cm}X X}
+\toprule
+\textbf{Tiêu chí} & \textbf{Cấp phát bộ nhớ tĩnh} & \textbf{Cấp phát bộ nhớ động} \\
+\midrule
+\textbf{Thời điểm thực hiện} & Tại thời điểm biên dịch (\textit{Compile-time}) & Trong khi chương trình chạy (\textit{Runtime}) \\
+\textbf{Vùng nhớ lưu trữ} & Vùng nhớ Stack / Data Segment & Vùng nhớ Heap \\
+\textbf{Kích thước vùng nhớ} & Cố định, không thể thay đổi & Co giãn linh hoạt theo nhu cầu \\
+\textbf{Cơ chế thu hồi} & Tự động thu hồi khi hết phạm vi & Lập trình viên chủ động giải phóng \\
+\bottomrule
+\end{tabularx}
+\caption{So sánh giữa cấp phát bộ nhớ tĩnh và cấp phát bộ nhớ động.}
+\end{table}
+
+\subsection{Phương pháp cấp phát bộ nhớ trong C và C++}
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Ngôn ngữ} & \textbf{Cấp phát bộ nhớ} & \textbf{Thu hồi -- Giải phóng} \\
+\midrule
+\textbf{C++} & \texttt{new} & \texttt{delete} / \texttt{delete[]} \\
+\textbf{C}   & \texttt{malloc()}, \texttt{calloc()}, \texttt{realloc()} & \texttt{free()} \\
+\bottomrule
+\end{tabular}
+\caption{Các cơ chế cấp phát động tương ứng trong C++ và C.}
+\end{table}
+
+\subsection{Cấp phát động một biến đơn bằng \texttt{new}}
+\begin{lstlisting}
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int* p = new int; // Cap phat dong 1 o nho kieu int tren Heap
+
+    if (p == NULL) // Kiem tra cap phat co thanh cong khong
+    {
+        cout << "Cap phat khong thanh cong" << endl;
+        return 1;
+    }
+
+    *p = 6789; // Gan gia tri vao o nho duoc tro toi
+
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Vừa cấp phát động vừa khởi tạo giá trị}
+\textbf{Cú pháp:}
+\begin{center}
+    \fbox{\textbf{\texttt{Kiểu\_Dữ\_Liệu* tên\_p = new Kiểu\_Dữ\_Liệu(giá\_trị);}}}
+\end{center}
+\textbf{Ví dụ:}
+\begin{lstlisting}
+int* p = new int(6789); // Vua cap phat vua khoi tao gia tri 6789
+cout << *p;             // In ra: 6789
+\end{lstlisting}
+
+\subsection{Thu hồi vùng nhớ và Hiện tượng Lạc con trỏ (Dangling Pointer)}
+\begin{itemize}[itemsep=0.2em]
+    \item Dùng toán tử \texttt{delete} để thu hồi vùng nhớ đã cấp phát: \texttt{delete p;}
+    \item Sau khi thu hồi vùng nhớ bằng \texttt{delete}, \textbf{con trỏ vẫn trỏ đến vùng nhớ đó}.
+    \item Có thể gọi tham chiếu nhưng kết quả không lường trước được $\Rightarrow$ \textbf{Hiện tượng lạc con trỏ} (\textit{dangling pointer}).
+\end{itemize}
+
+\begin{lstlisting}
+int* p = new int(6789);
+cout << "Gia tri p = " << p << endl;     // Vi du in: 0xe91970
+cout << *p << endl << endl;              // In: 6789
+
+delete p; // Thu hoi vung nho da cap phat
+
+cout << "Gia tri p = " << p << endl;     // p van giu dia chi 0xe91970!
+cout << *p << endl;                      // In gia tri rac: 15302288 hoac 16023184!
+\end{lstlisting}
+
+\subsection{Giải pháp xử lý con trỏ bị thất lạc}
+Để tránh con trỏ bị thất lạc thì sau khi \texttt{delete}, ta gán ngay giá trị \textbf{\texttt{NULL}} cho con trỏ:
+\begin{lstlisting}
+int* p = new int(6789);
+delete p;
+p = NULL; // Con tro p duoc gan ve NULL an toan
+
+cout << "Gia tri p = " << p << endl; // In: 0 (NULL)
+// cout << *p << endl; // Khong truy xuat *p khi p la NULL!
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    box/.style={rectangle, draw=black, minimum width=2.2cm, minimum height=0.6cm, align=center, fill=yellow!15, font=\small},
+    addr/.style={font=\ttfamily\footnotesize, text=addrcolor},
+    stepttl/.style={font=\bfseries, text width=3.5cm, align=left}
+]
+% Bước 1
+\node[stepttl] (s1) at (-2.2, 2.4) {1. Trước delete:};
+\node[font=\bfseries, right=0.1cm of s1] (lp1) {p};
+\node[box, right=0.2cm of lp1, label={[addr, yshift=2pt]above:0xb369}] (p1) {\texttt{0xf123}};
+\node[box, right=2.4cm of p1, label={[addr, yshift=2pt]above:0xf123}] (m1) {6789};
+\draw[-{Stealth[length=2.5mm]}, thick, blue] (p1.east) -- (m1.west);
+
+% Bước 2
+\node[stepttl] (s2) at (-2.2, 1.2) {2. Sau delete p:\\[-0.2em]\footnotesize\color{red}(Lạc con trỏ)};
+\node[font=\bfseries, right=0.1cm of s2] (lp2) {p};
+\node[box, right=0.2cm of lp2, label={[addr, yshift=2pt]above:0xb369}] (p2) {\texttt{0xf123}};
+\node[rectangle, draw=red, dashed, minimum width=2.2cm, minimum height=0.6cm, fill=red!10, font=\footnotesize, right=2.4cm of p2, label={[addr, yshift=2pt]above:0xf123}] (m2) {Đã giải phóng};
+\draw[-{Stealth[length=2.5mm]}, thick, red, dashed] (p2.east) -- (m2.west);
+
+% Bước 3
+\node[stepttl] (s3) at (-2.2, 0) {3. Sau p = NULL:\\[-0.2em]\footnotesize\color{codegreen}(An toàn)};
+\node[font=\bfseries, right=0.1cm of s3] (lp3) {p};
+\node[box, right=0.2cm of lp3, label={[addr, yshift=2pt]above:0xb369}] (p3) {\textbf{NULL}};
+\end{tikzpicture}
+\caption{Cơ chế thu hồi vùng nhớ và xử lý hiện tượng lạc con trỏ.}
+\end{figure}
+
+\section{Con Trỏ và Hàm}
+Con trỏ có thể dùng làm \textbf{tham số của hàm} hoặc \textbf{kiểu dữ liệu} trả về của hàm.
+
+\subsection{Con trỏ làm kiểu dữ liệu trả về của hàm}
+\begin{lstlisting}
+int* input()
+{
+    int* pi = new int; // Cap phat dong o nho tren Heap
+    cout << "Nhap gia tri: ";
+    cin >> *pi;
+    return pi;         // Tra ve con tro
+}
+
+int main()
+{
+    int* p = input();
+    cout << "Gia tri = " << *p << endl;
+
+    delete p;          // Thu hoi o nho sau khi su dung
+    p = NULL;
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Con trỏ làm tham số của hàm (Hàm hoán vị)}
+\begin{lstlisting}
+void hoan_vi(int* a, int* b)
+{
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+int main()
+{
+    int x = 3, y = 6;
+    cout << "Truoc hoan vi. x = " << x << "    y = " << y << endl;
+
+    hoan_vi(&x, &y); // Truyen dia chi cua cac bien vao ham
+
+    cout << "Sau hoan vi.  x = " << x << "    y = " << y << endl;
+    return 0;
+}
+\end{lstlisting}
+
+\section{Con Trỏ Trong Mảng Một Chiều}
+
+\subsection{Các địa chỉ trong mảng một chiều}
+\begin{lstlisting}
+int a[] = {5, 3, 7, 5, 9, 1};
+cout << "Dia chi mang: " << a << endl;
+for (int i = 0; i < 6; i++)
+    cout << i << "  " << &a[i] << endl;
+
+double b[] = {5.1, 3.6, 7.9, 5.3, 9.3, 1.9};
+cout << "Dia chi mang: " << b << endl;
+for (int i = 0; i < 6; i++)
+    cout << i << "  " << &b[i] << endl;
+\end{lstlisting}
+
+\noindent\textbf{Quy luật phân bổ địa chỉ:}
+\begin{itemize}[itemsep=0.15em]
+    \item Tên mảng đại diện cho địa chỉ phần tử đầu tiên: \texttt{a == \&a[0]}.
+    \item Mảng \texttt{int}: Mỗi phần tử cách nhau \textbf{4 byte} (\texttt{0x61fea0}, \texttt{0x61fea4}, \dots).
+    \item Mảng \texttt{double}: Mỗi phần tử cách nhau \textbf{8 byte} (\texttt{0x61fe70}, \texttt{0x61fe78}, \dots).
+\end{itemize}
+
+\subsection{Phép toán số học trên địa chỉ con trỏ (Pointer Arithmetic)}
+\begin{itemize}[itemsep=0.2em]
+    \item Khi con trỏ \textbf{cộng/trừ với một số nguyên}, địa chỉ của con trỏ sẽ \textbf{tăng/giảm} lên một số lượng bộ nhớ tương ứng với \textbf{số nguyên nhân vào kích thước của kiểu dữ liệu} mà con trỏ đang trỏ tới:
+    \begin{center}
+        \fbox{$\text{Địa chỉ mới} = \text{Địa chỉ cũ} \pm (n \times \text{sizeof}(\text{Kiểu\_Dữ\_Liệu}))$}
+    \end{center}
+    \item Cho mảng \texttt{int a[] = \{5, 3, 7, 5, 9, 1\};} và con trỏ \texttt{p = \&a[1];}:
+    \begin{itemize}
+        \item \texttt{*(p - 1)} trỏ về \texttt{a[0]}, có giá trị là \texttt{5}.
+        \item \texttt{*(p + 1)} trỏ tới \texttt{a[2]}, có giá trị là \texttt{7}.
+        \item Tổng quát: Biểu thức \texttt{*(a + i)} hoàn toàn tương đương với \texttt{a[i]}.
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    cell/.style={rectangle, draw=black, minimum width=1.5cm, minimum height=0.6cm, align=center, fill=yellow!15, font=\small},
+    idx/.style={font=\footnotesize\bfseries, color=red!80!black},
+    addr/.style={font=\ttfamily\tiny, color=blue!70!black}
+]
+\node[idx] at (0, 1.1) {0};
+\node[idx] at (1.6, 1.1) {1};
+\node[idx] at (3.2, 1.1) {2};
+\node[idx] at (4.8, 1.1) {3};
+\node[idx] at (6.4, 1.1) {4};
+\node[idx] at (8.0, 1.1) {5};
+
+\node[addr] at (0, 0.65) {0x61fea0};
+\node[addr] at (1.6, 0.65) {0x61fea4};
+\node[addr] at (3.2, 0.65) {0x61fea8};
+\node[addr] at (4.8, 0.65) {0x61feac};
+\node[addr] at (6.4, 0.65) {0x61feb0};
+\node[addr] at (8.0, 0.65) {0x61feb4};
+
+\node[cell] (c0) at (0, 0) {5};
+\node[cell] (c1) at (1.6, 0) {3};
+\node[cell] (c2) at (3.2, 0) {7};
+\node[cell] (c3) at (4.8, 0) {5};
+\node[cell] (c4) at (6.4, 0) {9};
+\node[cell] (c5) at (8.0, 0) {1};
+
+\node[rectangle, draw=orange, fill=yellow!40, font=\footnotesize\bfseries] at (1.6, -0.9) {p = \&a[1]};
+\node[font=\footnotesize, color=red!80!black] at (0, -0.9) {p - 1};
+\node[font=\footnotesize, color=codegreen] at (3.2, -0.9) {p + 1};
+\node[font=\footnotesize, color=codegreen] at (4.8, -0.9) {p + 2};
+\node[font=\footnotesize, color=codegreen] at (6.4, -0.9) {p + 3};
+\node[font=\footnotesize, color=codegreen] at (8.0, -0.9) {p + 4};
+\end{tikzpicture}
+\caption{Mô hình mảng một chiều trong bộ nhớ và bước nhảy địa chỉ con trỏ.}
+\end{figure}
+
+\subsection{Duyệt mảng bằng con trỏ}
+\begin{lstlisting}
+int a[] = {5, 3, 7, 5, 9, 1};
+
+// Cach 1: In dia chi cac phan tu trong mang
+for (int i = 0; i < 6; i++)
+    cout << a + i << endl;     // In dia chi
+
+// Cach 2: In gia tri cac phan tu bang toan tu giai tham chieu *
+for (int i = 0; i < 6; i++)
+    cout << *(a + i) << endl;  // Tuong duong cout << a[i];
+\end{lstlisting}
+
+\subsection{Các hàm xử lý mảng một chiều áp dụng kỹ thuật con trỏ}
+
+\subsubsection{Hàm xuất mảng}
+\begin{lstlisting}
+void xuat(int* a, int n)
+{
+    for (int i = 0; i < n; i++)
+        cout << *(a + i) << endl;
+}
+\end{lstlisting}
+
+\subsubsection{Hàm khởi tạo mảng tĩnh}
+\begin{lstlisting}
+void khoiTao(int* a, int& n)
+{
+    n = 6;
+    *(a + 0) = 3;
+    *(a + 1) = 1;
+    *(a + 2) = 6;
+    *(a + 3) = 9;
+    *(a + 4) = 7;
+    *(a + 5) = 8;
+}
+\end{lstlisting}
+
+\subsubsection{Hàm nhập mảng từ bàn phím}
+\begin{lstlisting}
+void nhap(int* a, int& n)
+{
+    cout << "So luong can nhap: ";
+    cin >> n;
+    for (int i = 0; i < n; i++)
+    {
+        cout << "\tNhap a[" << i << "] = ";
+        cin >> *(a + i); // Hoac cin >> a[i];
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Hàm tính tổng các phần tử}
+\begin{itemize}[itemsep=0.1em]
+    \item \textbf{Input:} Mảng \texttt{a} (\texttt{int* a}), Số lượng phần tử \texttt{n} (\texttt{int n}).
+    \item \textbf{Output:} Tổng các phần tử (trả về kiểu \texttt{int}).
+\end{itemize}
+\begin{lstlisting}
+int tinhTong(int* a, int n)
+{
+    int t = 0;
+    for (int i = 0; i < n; i++)
+        t = t + *(a + i);
+    return t;
+}
+\end{lstlisting}
+
+\subsection{Cú pháp cấp phát bộ nhớ động cho mảng một chiều}
+\textbf{Cú pháp:}
+\begin{center}
+    \fbox{\textbf{\texttt{Kiểu\_Dữ\_Liệu* tên\_mảng = new Kiểu\_Dữ\_Liệu[kích\_thước];}}}
+\end{center}
+\textbf{Ví dụ thực thi và giải phóng:}
+\begin{lstlisting}
+int main()
+{
+    int* a = new int[100]; // Cap phat mang dong 100 so nguyen tren Heap
+    int n = 0;
+
+    khoiTao(a, n);
+    xuat(a, n);
+
+    delete[] a; // Thu hoi mang dong bang delete[]
+    a = NULL;
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Bài tập trắc nghiệm phân tích (Đề thi)}
+\begin{lstlisting}
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int a[] = {1, 3, 5, 7, 9, 2, 4, 6, 8};
+    cout << *(a + 3) + *(a + 7);
+    return 0;
+}
+\end{lstlisting}
+\textbf{Giải thích đáp án:}
+\begin{itemize}[itemsep=0.15em]
+    \item \texttt{*(a + 3)} lấy giá trị phần tử tại chỉ số 3: $a[3] = 7$.
+    \item \texttt{*(a + 7)} lấy giá trị phần tử tại chỉ số 7: $a[7] = 6$.
+    \item Kết quả: $7 + 6 = 13$. Chương trình xuất ra giá trị \textbf{\texttt{13}}.
+\end{itemize}
+
+\section{Con Trỏ và Kiểu Cấu Trúc (Struct)}
+
+\subsection{Cú pháp khai báo và cấp phát con trỏ cấu trúc}
+\begin{itemize}[itemsep=0.15em]
+    \item \textbf{Khai báo con trỏ:} \texttt{Kiểu\_Cấu\_Trúc* tên\_biến;}
+    \item \textbf{Cấp phát bộ nhớ:} \texttt{tên\_biến = new Kiểu\_Cấu\_Trúc();}
+    \item \textbf{Vừa khai báo vừa cấp phát:} \texttt{Kiểu\_Cấu\_Trúc* tên\_biến = new Kiểu\_Cấu\_Trúc();}
+\end{itemize}
+
+\subsection{Truy xuất thuộc tính bằng toán tử mũi tên (\texttt{->})}
+\begin{center}
+    \fbox{\textbf{\texttt{tên\_biến\_con\_trỏ->tên\_thuộc\_tính}}}
+\end{center}
+\textbf{Ví dụ:}
+\begin{lstlisting}
+struct Diem
+{
+    int x;
+    int y;
+};
+
+int main()
+{
+    Diem a = {3, 5};
+    Diem* p = &a; // Con tro p tro toi cau truc a
+
+    cout << "Hoanh do x = " << p->x << endl; // In: 3
+    cout << "Tung do y = " << p->y << endl;  // In: 5
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Quan hệ tương đương giữa \texttt{->} và \texttt{(*p).}}
+Hai cách truy xuất thành phần thông qua con trỏ là hoàn toàn tương đương nhau:
+\begin{center}
+    \fbox{\textbf{\texttt{p->x $\iff$ (*p).x}}}
+\end{center}
+\begin{lstlisting}
+void xuat(Diem d)
+{
+    cout << "(" << d.x << "; " << d.y << ")\n";
+}
+
+int main()
+{
+    // Cach 1: Dung toan tu ->
+    Diem* b = new Diem;
+    b->x = 6;
+    b->y = 8;
+    xuat(*b); // In: (6; 8)
+
+    // Cach 2: Dung giai tham chieu ket hop dau cham .
+    Diem* c = new Diem;
+    (*c).x = 7;
+    (*c).y = 9;
+    xuat(*c); // In: (7; 9)
+
+    delete b; b = NULL;
+    delete c; c = NULL;
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Vừa cấp phát vừa khởi tạo giá trị cho cấu trúc}
+\begin{lstlisting}
+Diem* d = new Diem({1, 3});
+xuat(*d); // In: (1; 3)
+
+delete d;
+d = NULL;
+\end{lstlisting}
+
+\subsection{Cấp phát mảng động các phần tử cấu trúc}
+\begin{lstlisting}
+void khoiTao(Diem* d, int& n)
+{
+    n = 3;
+    *(d + 0) = {1, 2};
+    *(d + 1) = {2, 6};
+    *(d + 2) = {3, 1};
+}
+
+void xuatMang(Diem* d, int n)
+{
+    for (int i = 0; i < n; i++)
+        xuat(*(d + i));
+}
+
+int main()
+{
+    Diem* arr = new Diem[100]; // Mang dong chua 100 diem
+    int n = 0;
+
+    khoiTao(arr, n);
+    xuatMang(arr, n);
+
+    delete[] arr;
+    arr = NULL;
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Cấu trúc tự tham chiếu (Đệ quy tự trỏ -- Self-referential Structures)}
+Con trỏ cấu trúc là nền tảng cốt lõi để xây dựng các cấu trúc dữ liệu liên kết động:
+\begin{itemize}[itemsep=0.3em]
+    \item \textbf{Cấu trúc Node của Danh sách liên kết (Linked List):}
+\begin{lstlisting}
+struct Node
+{
+    int data;     // Du lieu cua nut
+    Node* pNext;  // Con tro tro toi Node ke tiep
+};
+\end{lstlisting}
+    \item \textbf{Cấu trúc NODE của Cây nhị phân (Binary Tree):}
+\begin{lstlisting}
+struct NODE
+{
+    int data;     // Du lieu cua nut
+    NODE* pLeft;  // Con tro tro toi cay con ben trai
+    NODE* pRight; // Con tro tro toi cay con ben phai
+};
+\end{lstlisting}
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm,
+    nodebox/.style={rectangle split, rectangle split parts=2, rectangle split horizontal, draw=black, fill=yellow!15, minimum height=0.6cm},
+    treenode/.style={rectangle split, rectangle split parts=3, rectangle split horizontal, draw=black, fill=blue!10, minimum height=0.6cm}
+]
+% Linked list node
+\node[font=\bfseries\color{codeblue}] at (0, 1.0) {Cấu trúc Node của Danh sách liên kết};
+\node[nodebox] (n1) at (0, 0.2) {\texttt{data} \nodepart{two} \texttt{pNext}};
+\node[nodebox, right=of n1] (n2) {\texttt{data} \nodepart{two} \texttt{pNext}};
+\node[right=of n2, font=\footnotesize\bfseries] (nnull) {\textbf{NULL}};
+\draw[-{Stealth[length=2mm]}, thick] (n1.two north) -- ++(0, 0.25) -| (n2.west);
+\draw[-{Stealth[length=2mm]}, thick] (n2.two north) -- ++(0, 0.25) -| (nnull.west);
+
+% Tree node
+\begin{scope}[yshift=-2.2cm]
+\node[font=\bfseries\color{codeblue}] at (2.2, 0.9) {Cấu trúc NODE của Cây nhị phân};
+\node[treenode] (t) at (2.2, 0.1) {\texttt{pLeft} \nodepart{two} \texttt{data} \nodepart{three} \texttt{pRight}};
+\node[rectangle, draw=black, fill=blue!5, font=\footnotesize, below left=0.7cm and 0.2cm of t.one south] (tl) {Cây con trái};
+\node[rectangle, draw=black, fill=blue!5, font=\footnotesize, below right=0.7cm and 0.2cm of t.three south] (tr) {Cây con phải};
+\draw[-{Stealth[length=2mm]}, thick] (t.one south) -- (tl.north);
+\draw[-{Stealth[length=2mm]}, thick] (t.three south) -- (tr.north);
+\end{scope}
+\end{tikzpicture}
+\caption{Mô hình minh họa các cấu trúc dữ liệu tự tham chiếu.}
+\end{figure}
+
+\section{Hệ Thống Bài Tập Ứng Dụng}
+
+\subsection{Bài Tập 1: Áp dụng con trỏ cho mảng một chiều}
+\textbf{Đề bài:} Xây dựng mảng một chiều lưu trữ các số thực. Sau đó, viết các hàm thực hiện các chức năng sau:
+\begin{enumerate}[itemsep=0.15em]
+    \item Tạo giá trị ngẫu nhiên (số thực, lấy 2 chữ số sau dấu phẩy thập phân) thuộc khoảng $(-268; 339)$. Số lượng phần tử thuộc đoạn $[10; 20]$.
+    \item Xuất (in) mảng vừa tạo ra màn hình.
+    \item Tính tổng các giá trị có trong mảng.
+    \item Tính tổng và tích các giá trị có trong mảng (viết gom trong 1 hàm duy nhất).
+    \item Đếm số lần xuất hiện của một phần tử $x$ bất kỳ trong mảng.
+    \item Trả về các phần tử chẵn có trong mảng (tính chẵn -- lẻ dựa vào giá trị nguyên của số thực).
+    \item Tìm vị trí (chỉ số) của phần tử nhỏ nhất trong mảng.
+    \item Tạo một mảng mới chứa các phần tử đảo ngược từ mảng ban đầu.
+    \item Trả về danh sách các số âm có trong mảng.
+    \item Trả về số lượng các giá trị trong mảng thuộc đoạn $[x, y]$.
+    \item Trả về danh sách các giá trị trong mảng thuộc đoạn $[x, y]$.
+\end{enumerate}
+
+\subsection{Bài Tập 2: Kỹ thuật cấp phát động cho mảng một chiều}
+\textbf{Đề bài:} Áp dụng kỹ thuật cấp phát bộ nhớ động cho mảng một chiều. Viết các \textbf{HÀM} thực hiện các yêu cầu sau:
+\begin{enumerate}[itemsep=0.15em]
+    \item Khởi tạo mảng số thực động gồm các giá trị mẫu:
+    \begin{center}
+        \texttt{| 0.8 | 5.6 | 9.1 | 7.3 | 10 | 5.9 | 7.2 | 9.3 | 8.0 | 8.7 |}
+    \end{center}
+    \item Xuất mảng ra màn hình.
+    \item Kiểm tra mảng có toàn số dương hay không.
+    \item Kiểm tra mảng có đối xứng hay không.
+    \item Kiểm tra trong mảng có chứa số nguyên tố, số chính phương hay không.
+    \item Tìm kiếm một giá trị có trong mảng.
+    \item Tìm các số nguyên tố có trong mảng.
+    \item Tìm các số chính phương có trong mảng.
+    \item Trả về các số âm trong mảng.
+    \item Tìm các số dương trong mảng và tính tổng của chúng.
+    \item Đảo ngược các phần tử trong mảng trực tiếp trên mảng động.
+\end{enumerate}
+
+\subsection{Bài Tập 3: Quản lý và tính tiền lương nhân viên bằng cấp phát động}
+\textbf{Mô tả bài toán:} Viết chương trình quản lý và tính tiền lương cho các nhân viên trong một công ty.
+\begin{itemize}[itemsep=0.15em]
+    \item \textbf{Thông tin mỗi nhân viên:} Mã nhân viên, Họ tên, Lương cơ bản, Số ngày làm việc, Lương hằng tháng.
+    \item \textbf{Công thức tính lương hằng tháng:}
+    \begin{center}
+        $\text{Lương hằng tháng} = \text{Lương căn bản} + \text{Số ngày làm việc} \times 180.000\text{ đ}$
+    \end{center}
+    \item \textbf{Quy định tiền thưởng và phụ cấp:}
+    \begin{itemize}
+        \item Nếu lương hằng tháng $> 8.000.000\text{ đ}$ thì được \textbf{thưởng thêm $5\%$}.
+        \item Nếu lương cơ bản $< 5.000.000\text{ đ}$ thì được \textbf{phụ cấp thêm $10\%$}.
+    \end{itemize}
+\end{itemize}
+
+\noindent\textbf{Các yêu cầu xây dựng chương trình (áp dụng cấp phát động):}
+\begin{enumerate}[itemsep=0.15em]
+    \item Tạo dữ liệu các nhân viên dùng để kiểm thử (10 nhân viên).
+    \item Xuất danh sách nhân viên trong công ty.
+    \item Tính và cập nhật tiền lương cho các loại nhân viên.
+    \item Tính tổng tiền lương hằng tháng mà công ty phải chi trả cho toàn bộ nhân viên.
+    \item Tính tổng tiền lương hằng tháng các nhân viên có lương cơ bản $< 5.000.000\text{ đ}$.
+    \item Tìm nhân viên theo mã nhân viên.
+    \item Tìm các nhân viên có lương hằng tháng thấp nhất.
+    \item Tìm các nhân viên có lương cơ bản cao nhất.
+\end{enumerate}
+
+\end{document}

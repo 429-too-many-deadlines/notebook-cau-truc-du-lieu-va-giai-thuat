@@ -1,0 +1,165 @@
+# ==========================================
+# C / C++ - Xử lý file thực thi không đuôi trong Code/
+# ==========================================
+# Bỏ qua file thực thi không có phần mở rộng sinh ra khi biên dịch C/C++ trên Linux
+# (Các file có đuôi như .cpp, .c, .h, .hpp, .tex, .pdf... vẫn được giữ lại)
+Code/**
+!Code/**/
+!Code/**/*.*
+!Code/**/Makefile
+!Code/**/README
+!Code/**/LICENSE
+
+# File biên dịch / debug C/C++
+*.exe
+*.out
+*.app
+*.o
+*.obj
+*.ko
+*.elf
+*.ilk
+*.map
+*.exp
+*.lib
+*.a
+*.la
+*.lo
+*.so
+*.so.*
+*.dylib
+*.dll
+*.pdb
+*.idb
+*.d
+*.gch
+*.pch
+*.su
+*.stackdump
+*.dSYM/
+tempCodeRunnerFile
+tempCodeRunnerFile.*
+
+# ==========================================
+# LaTeX (vẫn giữ lại file .tex và .pdf)
+# ==========================================
+# File tạm / trung gian khi biên dịch LaTeX
+*.aux
+*.lof
+*.lot
+*.fls
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+*.log
+*.dvi
+*.xdv
+*.ps
+*.brf
+*.loa
+*.loe
+*.lol
+*.lox
+*.spl
+*.tdo
+*.thm
+*.upa
+*.upb
+*.mw
+*.xmpi
+*.xmpdata
+
+# SyncTeX
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+
+# latexmk
+*.fdb_latexmk
+
+# Bibliography (BibTeX / BibLaTeX / Biber)
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+
+# Index & Glossary
+*.idx
+*.ilg
+*.ind
+*.ist
+*.glo
+*.gls
+*.glg
+*.glsdefs
+*.acn
+*.acr
+*.alg
+*.nlo
+*.nls
+
+# Beamer
+*.nav
+*.snm
+*.vrb
+
+# Minted / PythonTeX / SageTeX / TikZ externalize
+_minted*/
+*.pyg
+*.pygtex
+*.pygstyle
+pythontex-files-*/
+*.sagetex.sage
+*.sagetex.py
+*.sagetex.scmd
+*.dpth
+*.md5
+*.auxlock
+
+# ==========================================
+# Editor / IDE & Hệ điều hành
+# ==========================================
+# VS Code
+.vscode/
+
+# File tạm của editor
+*~
+*.bak
+*.sav
+*.tmp
+*.swp
+*.swo
+
+# Linux
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ==========================================
+# Luôn giữ lại file .tex và .pdf
+# ==========================================
+!*.tex
+!*.pdf
